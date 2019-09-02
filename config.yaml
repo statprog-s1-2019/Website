@@ -1,5 +1,5 @@
 baseurl: "/"
-title: "Statistical Programming (MATH 11176)"
+title: "Statistical Programming"
 author: "Colin Rundel"
 copyright: "&copy; 2019. All rights reserved."
 ignoreFiles: ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
@@ -28,7 +28,7 @@ menu:
 
 params:
   subtitle: ""
-  course: "Stat Prog"
+  course: "Math 11176"
   semester: Semester 1
   highlightjs: androidstudio
   highlightjs_extra_languages:
