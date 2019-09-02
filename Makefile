@@ -16,7 +16,7 @@ build: $(SLIDE_HTML_FILES) $(HW_HTML_FILES)
 	hugo
 
 open: build
-	open public/index.html
+	open docs/index.html
 
 clean:
 	rm -rf _site/*

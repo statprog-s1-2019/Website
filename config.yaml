@@ -3,7 +3,7 @@ title: "Statistical Programming (MATH 11176)"
 author: "Colin Rundel"
 copyright: "&copy; 2019. All rights reserved."
 ignoreFiles: ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
-
+publishDir: "docs"
 
 menu:
   main:
@@ -28,7 +28,7 @@ menu:
 
 params:
   subtitle: ""
-  course: "StatProg"
+  course: "Stat Prog"
   semester: Semester 1
   highlightjs: androidstudio
   highlightjs_extra_languages:
