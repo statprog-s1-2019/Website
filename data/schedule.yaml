@@ -1,0 +1,126 @@
+startdate: "2019-09-16"
+dateFormat: 'Mon, Jan 2'
+schedule:
+- week: 1
+  day: 0
+  lecture: "Introduction <br/> Logic and Types in R <br/> git & Github"
+  readings:
+  - text: Tidyverse style guide
+    link: https://style.tidyverse.org/
+  - text: Adv-R - Data Structures
+    link: http://adv-r.had.co.nz/Data-structures.html
+  - text: Happy Git and GitHub
+    link: http://happygitwithr.com/
+  notes: "HW1 out - due 23/09 by 11:59 pm"
+
+- week: 2
+  day: 0
+  lecture: "Data Structures & S3 <br/> Base Subsetting"
+  readings:
+  - text: Adv R - OO Field Guide - S3
+    link: http://adv-r.had.co.nz/OO-essentials.html#s3
+  - text: Adv-R - Subsetting
+    link: http://adv-r.had.co.nz/Subsetting.html
+  notes:
+
+- week: 3
+  day: 0
+  lecture: "dplyr & Tidy data"
+  readings:
+  - text: dplyr Vignette
+    link: https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html
+  - text: R4DS - tidy data
+    link: http://r4ds.had.co.nz/tidy-data.html
+  - text: Data transformation cheatsheet
+    link: https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf
+  - text: data import cheatsheet
+    link: https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf
+  notes: 
+
+- week: 4
+  day: 0
+  lecture: "purrr"
+  readings:
+  - text: Purrr tutorial
+    link: https://jennybc.github.io/purrr-tutorial/index.html
+  - text: R4DS - Iteration
+    link: http://r4ds.had.co.nz/iteration.html
+  - text: purrr cheatsheet
+    link: https://github.com/rstudio/cheatsheets/raw/master/purrr.pdf
+  notes: 
+
+- week: 5
+  day: 0
+  lecture: "Visualization & ggplot2"
+  readings:
+  - text:  R4DS - Visualization
+    link: http://r4ds.had.co.nz/data-visualisation.html
+  - text: ggplot2 Reference
+    link: http://ggplot2.tidyverse.org/reference/index.html
+  notes: 
+
+- week: 6
+  day: 0
+  lecture: "Regular expressions & text data <br/> Web scraping"
+  readings:
+  - text: Regex Cheat Sheet, 
+    link: http://perso.ens-lyon.fr/lise.vaudor/Rfigures/Expressions_regulieres/regexp.png
+  - text: stringr vignette
+    link: https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html
+  - text: regex tester
+    link: https://regexr.com/
+  - text: rvest - selector gadget vignette
+    link: https://cran.r-project.org/web/packages/rvest/vignettes/selectorgadget.html
+  notes: 
+
+
+- week: 7
+  day: 0
+  lecture: "Web APIs <br/> Make"
+  readings:
+  - text: minimal make
+    link: http://kbroman.org/minimal_make/
+  - text: Why use make
+    link: http://bost.ocks.org/mike/make/
+  notes: 
+
+- week: 8
+  day: 0
+  lecture: "Shiny"
+  readings:
+  - text: Shiny Documentation & Gallery
+    link: http://shiny.rstudio.com/
+  - text: Widget Gallery
+    link: http://shiny.rstudio.com/gallery/widget-gallery.html
+  notes: 
+
+- week: 9
+  day: 0
+  lecture: "Profiling & Parallelization"
+  readings:
+  - text: profvis
+    link: https://rstudio.github.io/profvis/
+  - text: parallel package
+    link: https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf
+  - text: doMC and foreach
+    link: http://cran.r-project.org/web/packages/doMC/vignettes/gettingstartedMC.pdf
+  - text: furrr
+    link: https://github.com/DavisVaughan/furrr
+  notes: 
+
+- week: 10
+  day: 0
+  lecture: "dplyr, databases, & sql"
+  readings:
+  - text: SQL Translation
+    link: https://cran.r-project.org/web/packages/dbplyr/vignettes/sql-translation.html
+  - text: dbplyr Vignette
+    link: https://cran.r-project.org/web/packages/dbplyr/vignettes/dbplyr.html
+  notes:
+
+- week: 11
+  day: 0
+  lecture: "Project Support"
+  readings:
+  notes: 
+
