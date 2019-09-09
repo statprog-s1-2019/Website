@@ -1,12 +1,9 @@
 <div class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed">
   
   <div>
-      <span id="class">
-        {{ .Site.Params.course | safeHTML }} <br/>
-        <span id="semester">{{ .Site.Params.semester | safeHTML }}</span>
-      </span>
-      &nbsp;
-      {{ .Site.Title | safeHTML }}
+      {{ .Site.Params.course | safeHTML }}
+      &nbsp; - &nbsp;
+      {{ .Site.Title | safeHTML }} {{ .Site.Params.subtitle | safeHTML }} 
   </div>
 
   <ul class="pure-menu-list">

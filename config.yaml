@@ -17,6 +17,10 @@ menu:
     weight: 2
     identifier: syllabus
     url: "#syllabus"
+  - name: Piazza
+    pre: <i class="fas fa-comment fa-fw"></i>
+    weight: 3
+    url: http://piazza.com/ed.ac.uk/fall2019/math11176
   - name: Github
     pre: <i class='fa fa-github fa-fw'></i>
     weight: 6
@@ -24,12 +28,11 @@ menu:
   - name: RStudio
     pre: <i class='fab fa-r-project fa-fw'></i>
     weight: 7
-    url: https://www.learn.ed.ac.uk/webapps/blackboard/content/launchLink.jsp?course_id=_70955_1&tool_id=_3597_1&tool_type=TOOL&mode=cpview&mode=reset
+    url: https://noteable.edina.ac.uk/home
 
 params:
-  subtitle: ""
+  subtitle: "(2019-2020) [Sem 1]"
   course: "Math 11176"
-  semester: Semester 1
   highlightjs: androidstudio
   highlightjs_extra_languages:
     - yaml

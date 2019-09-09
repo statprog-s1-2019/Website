@@ -19,13 +19,11 @@ open: build
 	open docs/index.html
 
 clean:
-	rm -rf _site/*
-	rm -f _posts/*.html
-	rm -f slides/*.html
-	rm -f hw/*.html
+	rm -rf docs/
+	rm -f static/slides/*.html
 
 push: build
-	@echo "Syncing to $(REMOTE)"
+	@git add docs/
 	@rsync -azp public/* $(REMOTE)
 
 static/slides/%.html: static/slides/%.Rmd

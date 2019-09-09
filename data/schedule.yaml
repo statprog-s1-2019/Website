@@ -11,7 +11,7 @@ schedule:
     link: http://adv-r.had.co.nz/Data-structures.html
   - text: Happy Git and GitHub
     link: http://happygitwithr.com/
-  notes: "HW1 out - due 23/09 by 11:59 pm"
+  notes: "HW1 out"
 
 - week: 2
   day: 0
@@ -21,7 +21,7 @@ schedule:
     link: http://adv-r.had.co.nz/OO-essentials.html#s3
   - text: Adv-R - Subsetting
     link: http://adv-r.had.co.nz/Subsetting.html
-  notes:
+  notes: "HW2 out"
 
 - week: 3
   day: 0
@@ -35,7 +35,7 @@ schedule:
     link: https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf
   - text: data import cheatsheet
     link: https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf
-  notes: 
+  notes: "HW3 out" 
 
 - week: 4
   day: 0
@@ -57,7 +57,7 @@ schedule:
     link: http://r4ds.had.co.nz/data-visualisation.html
   - text: ggplot2 Reference
     link: http://ggplot2.tidyverse.org/reference/index.html
-  notes: 
+  notes: "HW4 out"
 
 - week: 6
   day: 0
@@ -71,7 +71,7 @@ schedule:
     link: https://regexr.com/
   - text: rvest - selector gadget vignette
     link: https://cran.r-project.org/web/packages/rvest/vignettes/selectorgadget.html
-  notes: 
+  notes: "Project 1 out"
 
 
 - week: 7
@@ -82,7 +82,7 @@ schedule:
     link: http://kbroman.org/minimal_make/
   - text: Why use make
     link: http://bost.ocks.org/mike/make/
-  notes: 
+  notes: "HW5 out" 
 
 - week: 8
   day: 0
@@ -106,7 +106,7 @@ schedule:
     link: http://cran.r-project.org/web/packages/doMC/vignettes/gettingstartedMC.pdf
   - text: furrr
     link: https://github.com/DavisVaughan/furrr
-  notes: 
+  notes: "HW6 out" 
 
 - week: 10
   day: 0
@@ -116,7 +116,7 @@ schedule:
     link: https://cran.r-project.org/web/packages/dbplyr/vignettes/sql-translation.html
   - text: dbplyr Vignette
     link: https://cran.r-project.org/web/packages/dbplyr/vignettes/dbplyr.html
-  notes:
+  notes: "Project 2 out"
 
 - week: 11
   day: 0
