@@ -14,9 +14,10 @@ clean:
 	rm -f static/slides/*.html
 
 push: build
-	@git add docs/
-	@git commit -m "Update site content"
-	@git push
+	@cd docs/;  \
+	 git add .; \
+	 git commit -m "Update site content"; \
+	 git push
 	
 
 static/slides/%.html: static/slides/%.Rmd

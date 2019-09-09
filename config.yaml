@@ -42,7 +42,6 @@ params:
     - syllabus
     - textbooks
     - contact
-    - software
     - about
   contact:
     - name: Dr. Colin Rundel
