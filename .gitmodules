@@ -1,0 +1,3 @@
+[submodule "docs"]
+	path = docs
+	url = git@github.com:statprog-s1-2019/statprog-s1-2019.github.io.git
