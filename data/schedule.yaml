@@ -11,7 +11,7 @@ schedule:
     link: http://adv-r.had.co.nz/Data-structures.html
   - text: Happy Git and GitHub
     link: http://happygitwithr.com/
-  notes: "HW1 out"
+  notes:
 
 - week: 2
   day: 0
@@ -21,7 +21,7 @@ schedule:
     link: http://adv-r.had.co.nz/OO-essentials.html#s3
   - text: Adv-R - Subsetting
     link: http://adv-r.had.co.nz/Subsetting.html
-  notes: "HW2 out"
+  notes: "HW1 out"
 
 - week: 3
   day: 0
@@ -35,7 +35,7 @@ schedule:
     link: https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf
   - text: data import cheatsheet
     link: https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf
-  notes: "HW3 out" 
+  notes: "HW2 out"
 
 - week: 4
   day: 0
@@ -57,70 +57,42 @@ schedule:
     link: http://r4ds.had.co.nz/data-visualisation.html
   - text: ggplot2 Reference
     link: http://ggplot2.tidyverse.org/reference/index.html
-  notes: "HW4 out"
+  notes: "Project 1 out"
 
 - week: 6
   day: 0
-  lecture: "Regular expressions & text data <br/> Web scraping"
+  lecture: "TBD"
   readings:
-  - text: Regex Cheat Sheet, 
-    link: http://perso.ens-lyon.fr/lise.vaudor/Rfigures/Expressions_regulieres/regexp.png
-  - text: stringr vignette
-    link: https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html
-  - text: regex tester
-    link: https://regexr.com/
-  - text: rvest - selector gadget vignette
-    link: https://cran.r-project.org/web/packages/rvest/vignettes/selectorgadget.html
-  notes: "Project 1 out"
+  notes: "HW3 out"
 
 
 - week: 7
   day: 0
-  lecture: "Web APIs <br/> Make"
+  lecture: "TBD"
   readings:
-  - text: minimal make
-    link: http://kbroman.org/minimal_make/
-  - text: Why use make
-    link: http://bost.ocks.org/mike/make/
-  notes: "HW5 out" 
+  notes: "" 
 
 - week: 8
   day: 0
-  lecture: "Shiny"
+  lecture: "TBD"
   readings:
-  - text: Shiny Documentation & Gallery
-    link: http://shiny.rstudio.com/
-  - text: Widget Gallery
-    link: http://shiny.rstudio.com/gallery/widget-gallery.html
-  notes: 
+  notes: "HW4 out"
 
 - week: 9
   day: 0
-  lecture: "Profiling & Parallelization"
+  lecture: "TBD"
   readings:
-  - text: profvis
-    link: https://rstudio.github.io/profvis/
-  - text: parallel package
-    link: https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf
-  - text: doMC and foreach
-    link: http://cran.r-project.org/web/packages/doMC/vignettes/gettingstartedMC.pdf
-  - text: furrr
-    link: https://github.com/DavisVaughan/furrr
-  notes: "HW6 out" 
+  notes: "" 
 
 - week: 10
   day: 0
-  lecture: "dplyr, databases, & sql"
+  lecture: "TDB"
   readings:
-  - text: SQL Translation
-    link: https://cran.r-project.org/web/packages/dbplyr/vignettes/sql-translation.html
-  - text: dbplyr Vignette
-    link: https://cran.r-project.org/web/packages/dbplyr/vignettes/dbplyr.html
   notes: "Project 2 out"
 
 - week: 11
   day: 0
-  lecture: "Project Support"
+  lecture: "Shiny"
   readings:
   notes: 
 
