@@ -1,10 +1,15 @@
 SLIDE_RMD_FILES := $(wildcard static/slides/*.Rmd)
 SLIDE_HTML_FILES  := $(subst Rmd,html,$(SLIDE_RMD_FILES))
+SLIDE_PDF_FILES  := $(subst Rmd,pdf,$(SLIDE_RMD_FILES))
 
-.PHONY: clean push
+.PHONY: clean push build all pdf
 
 build: $(SLIDE_HTML_FILES)
 	hugo
+
+all: build pdf
+
+pdf: $(SLIDE_PDF_FILES)
 
 open: build
 	open docs/index.html
@@ -21,5 +26,7 @@ push: build
 	
 
 static/slides/%.html: static/slides/%.Rmd
-	@echo "Rendering post: $(@F)"
 	@Rscript -e "rmarkdown::render('$<')"
+	
+static/slides/%.pdf: static/slides/%.html
+	`npm  bin`/decktape remark $< $@ --chrome-arg=--disable-web-security
