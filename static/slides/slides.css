@@ -190,9 +190,6 @@ thead, tfoot, tr:nth-child(even) { background: #eee }
     right: 810px;
     height: 70px;
     width: 81px;
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-image: url("dsbox-logo.png");
 }
 
 .element .style {
