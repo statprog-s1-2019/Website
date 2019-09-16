@@ -152,6 +152,32 @@ knitr::include_graphics("imgs/RStudio-Logo.png")
 
 Login via the link on the left-side menu in Learn.
 
+---
+
+## Other Tools
+
+<br/><br/>
+
+.center[
+```{r echo=FALSE, out.width="50%"}
+knitr::include_graphics("imgs/github_logo.png")
+```
+
+<br/>
+
+```{r echo=FALSE, out.width="40%"}
+knitr::include_graphics("imgs/piazza-logo.png")
+```
+
+<br/>
+
+```{r echo=FALSE, out.width="50%"}
+knitr::include_graphics("imgs/tophat-logo.png")
+```
+]
+
+Links on the left-side menu in Learn - make sure you have active accounts on all three.
+
 
 ---
 class: middle
