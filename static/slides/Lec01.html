@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Lecture 01</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Colin Rundel" />
+    <meta name="date" content="2019-09-16" />
+    <link rel="stylesheet" href="slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Lecture 01
+### Colin Rundel
+### 2019-09-16
+
+---
+
+exclude: true
+
+
+
+---
+class: middle, center
+
+# Course Details
+
+---
+
+## Course website
+
+&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;
+
+.center[
+**Learn** - https://learn.ed.ac.uk
+&lt;br/&gt;&lt;br/&gt;
+and/or
+&lt;br/&gt;&lt;br/&gt;
+https://statprog-s1-2019.github.io
+]
+
+---
+
+## Reproducible Research / Computing
+
+* R + RStudio + rmarkdown
+
+* Git + github
+
+--
+
+&lt;br/&gt;
+
+.center[
+*Programming course with statistics*
+
+vs.
+
+*Statistics course with programming*
+]
+
+
+---
+
+## Weekly Schedule
+
+* Mondays, 16:10 - 18:00
+  - Lecture
+
+* Thursday, ??? - ???
+  - Workshop
+  
+---
+
+## Marking
+
+&lt;br/&gt;
+
+.center[
+
+|Assignment|Type      |Value|Assigned   |
+|:---------|:---------|:----|---------- |
+|Homework 1|Team      |10%  |Out Week 2 |
+|Homework 2|Team      |10%  |Out Week 4 |
+|Project 1 |Individual|30%  |Out Week 5 |
+|Homework 3|Team      |10%  |Out Week 7 |
+|Homework 4|Team      |10%  |Out Week 9 |
+|Project 2 |Individual|30%  |Out Week 10|
+
+]
+
+---
+
+## Teams
+
+* Team homework assignments
+    + Roughly biweekly assignments
+    + Open ended
+    + 5 - 20 hours of work
+    + Peer evaluation at the end
+
+&lt;br/&gt;
+
+* Expectations and roles
+    + Everyone is expected to contribute equal *effort*
+    + Everyone is expected to understand *all* code turned in
+    + Individual contribution evaluated by peer evaluation, commits, etc.
+
+---
+
+## Collaboration policy
+
+
+- Only work that is clearly assigned as team work should be completed collaboratively (Homework). 
+
+- On projects you may not directly share or discuss code with anyone other than the Instructors and Tutors
+
+- On homeworks you may not directly share code with other team(s) in this class, however you are welcome to discuss the problems together and ask for advice
+
+
+---
+
+## Sharing / reusing code policy
+
+- I am well aware that a huge volume of code is available on the web to solve any number of problems.
+
+- Unless I explicitly tell you not to use something the course's policy is that you may make use of any online resources (e.g. Google, StackOverflow, etc.) but you must explicitly cite where you obtained any code you directly use (or use as inspiration). 
+
+- Any recycled code that is discovered and is not explicitly cited will be treated as plagiarism. 
+
+
+---
+class: middle
+count: false
+
+# (Almost) &lt;br/&gt; Everything is a Vector
+
+---
+
+## Vectors
+
+The fundamental building block of data in R are vectors (collections of related values, objects, other data structures, etc).
+
+--
+&lt;br/&gt;
+
+R has two types of vectors:
+
+* **atomic** vectors 
+
+    - homogeneous collections of the *same* type (e.g. all logical values, all numbers, or all character strings).
+
+* **generic** vectors
+  
+    - heterogeneous collections of *any* type of R object, even other lists (meaning they can have a hierarchical/tree-like structure).
+
+---
+class: middle
+count: false
+
+# Atomic Vectors
+
+---
+
+## Atomic Vectors
+
+R has six atomic vector types: 
+
+&lt;br/&gt;
+
+  `typeof`  |  `mode`     
+:-----------|:------------
+logical     |  logical    
+double      |  numeric    
+integer     |  numeric    
+character   |  character  
+complex     |  complex    
+raw         |  raw        
+
+---
+
+## Vector types
+
+`logical` - boolean values `TRUE` and `FALSE`
+
+.pull-left[
+
+```r
+typeof(TRUE)
+```
+
+```
+## [1] "logical"
+```
+]
+
+.pull-right[
+
+```r
+mode(TRUE)
+```
+
+```
+## [1] "logical"
+```
+]
+
+&lt;br/&gt;
+
+`character` - text strings
+
+&lt;div&gt;
+
+.pull-left[
+
+```r
+typeof("hello")
+```
+
+```
+## [1] "character"
+```
+
+```r
+typeof('world')
+```
+
+```
+## [1] "character"
+```
+]
+
+.pull-right[
+
+```r
+mode("hello")
+```
+
+```
+## [1] "character"
+```
+
+```r
+mode('world')
+```
+
+```
+## [1] "character"
+```
+]
+
+&lt;/div&gt;
+
+---
+
+`double` - floating point numerical values (default numerical type)
+
+.pull-left[
+
+```r
+typeof(1.33)
+```
+
+```
+## [1] "double"
+```
+
+```r
+typeof(7)
+```
+
+```
+## [1] "double"
+```
+]
+
+.pull-right[
+
+```r
+mode(1.33)
+```
+
+```
+## [1] "numeric"
+```
+
+```r
+mode(7)
+```
+
+```
+## [1] "numeric"
+```
+]
+
+&lt;br/&gt;
+
+`integer` - integer numerical values (indicated with an `L`)
+
+&lt;div&gt;
+
+.pull-left[
+
+```r
+typeof( 7L )
+```
+
+```
+## [1] "integer"
+```
+
+```r
+typeof( 1:3 )
+```
+
+```
+## [1] "integer"
+```
+]
+
+.pull-right[
+
+```r
+mode( 7L )
+```
+
+```
+## [1] "numeric"
+```
+
+```r
+mode( 1:3 )
+```
+
+```
+## [1] "numeric"
+```
+]
+
+&lt;/div&gt;
+
+---
+
+## Concatenation
+
+Atomic vectors can be constructed using the concatenate, `c()`, function.
+
+
+```r
+c(1,2,3)
+```
+
+```
+## [1] 1 2 3
+```
+
+--
+
+
+```r
+c("Hello", "World!")
+```
+
+```
+## [1] "Hello"  "World!"
+```
+
+--
+
+
+```r
+c(1,c(2, c(3)))
+```
+
+```
+## [1] 1 2 3
+```
+
+**Note** - atomic vectors are *always* flat.
+
+---
+class: split-thirds
+
+## Inspecting types
+
+* `typeof(x)` - returns a character vector (length 1) of the *type* of object `x`.
+
+* `mode(x)` - returns a character vector (length 1) of the *mode* of object `x`.
+
+
+.pull-left[
+
+```r
+typeof(1)
+```
+
+```
+## [1] "double"
+```
+
+```r
+typeof(1L)
+```
+
+```
+## [1] "integer"
+```
+
+```r
+typeof("A")
+```
+
+```
+## [1] "character"
+```
+
+```r
+typeof(TRUE)
+```
+
+```
+## [1] "logical"
+```
+]
+
+.pull-right[
+
+```r
+mode(1)
+```
+
+```
+## [1] "numeric"
+```
+
+```r
+mode(1L)
+```
+
+```
+## [1] "numeric"
+```
+
+```r
+mode("A")
+```
+
+```
+## [1] "character"
+```
+
+```r
+mode(TRUE)
+```
+
+```
+## [1] "logical"
+```
+]
+
+---
+
+## Type Predicates
+
+* `is.logical(x)` - returns `TRUE` if `x` has *type* logical.
+
+* `is.character(x)` - returns `TRUE` if `x` has *type* character.
+
+* `is.double(x)` - returns `TRUE` if `x` has *type* double.
+
+* `is.integer(x)` - returns `TRUE` if `x` has *type* integer.
+
+* `is.numeric(x)` - returns `TRUE` if `x` has *mode* numeric.
+
+.col1[
+
+```r
+is.integer(1)
+```
+
+```
+## [1] FALSE
+```
+
+```r
+is.integer(1L)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+is.integer(3:7)
+```
+
+```
+## [1] TRUE
+```
+]
+
+.col2[
+
+```r
+is.double(1)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+is.double(1L)
+```
+
+```
+## [1] FALSE
+```
+
+```r
+is.double(3:8)
+```
+
+```
+## [1] FALSE
+```
+]
+
+.col3[
+
+```r
+is.numeric(1)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+is.numeric(1L)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+is.numeric(3:7)
+```
+
+```
+## [1] TRUE
+```
+]
+
+
+---
+
+## Other useful predicates
+
+* `is.atomic(x)` - returns `TRUE` if `x` is an *atomic vector*.
+
+* `is.vector(x)` - returns `TRUE` if `x` is either an *atomic vector* or *list*.
+
+
+```r
+is.atomic(c(1,2,3))
+```
+
+```
+## [1] TRUE
+```
+
+```r
+is.vector(c(1,2,3))
+```
+
+```
+## [1] TRUE
+```
+
+```r
+is.atomic(list(1,2,3))
+```
+
+```
+## [1] FALSE
+```
+
+```r
+is.vector(list(1,2,3))
+```
+
+```
+## [1] TRUE
+```
+
+
+---
+
+## Type Coercion
+
+R is a dynamically typed language -- it will automatically convert between most type without raising warnings or errors.
+
+
+```r
+c(1,"Hello")
+```
+
+```
+## [1] "1"     "Hello"
+```
+
+--
+
+
+```r
+c(FALSE, 3L)
+```
+
+```
+## [1] 0 3
+```
+
+--
+
+
+```r
+c(1.2, 3L)
+```
+
+```
+## [1] 1.2 3.0
+```
+
+---
+
+## Operator coercion
+
+Functions and operators will attempt to coerce object to an appropriate type
+
+
+```r
+3.1+1L
+```
+
+```
+## [1] 4.1
+```
+
+--
+
+
+```r
+log(TRUE)
+```
+
+```
+## [1] 0
+```
+
+--
+
+
+```r
+TRUE &amp; 7
+```
+
+```
+## [1] TRUE
+```
+
+--
+
+
+```r
+FALSE | !5
+```
+
+```
+## [1] FALSE
+```
+
+
+---
+
+## Explicit Coercion
+
+Most of the `is` functions we just saw have an `as` variant which can be used for *explicit* coercion.
+
+.pull-left[
+
+```r
+as.logical(5.2)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+as.character(TRUE)
+```
+
+```
+## [1] "TRUE"
+```
+
+```r
+as.integer(pi)
+```
+
+```
+## [1] 3
+```
+]
+
+.pull-right[
+
+```r
+as.numeric(FALSE)
+```
+
+```
+## [1] 0
+```
+
+```r
+as.double("7.2")
+```
+
+```
+## [1] 7.2
+```
+
+```r
+as.double("one")
+```
+
+```
+## Warning: NAs introduced by coercion
+```
+
+```
+## [1] NA
+```
+]
+
+---
+count: false
+class: middle
+
+# Conditionals
+
+---
+
+## Logical (boolean) operators
+
+|  Operator                     |  Operation    |  Vectorized? 
+|:-----------------------------:|:-------------:|:------------:
+| &lt;code&gt;x &amp;#124; y&lt;/code&gt;       |  or           |   Yes        
+| `x &amp; y`                       |  and          |   Yes        
+| `!x`                          |  not          |   Yes        
+| &lt;code&gt;x &amp;#124;&amp;#124; y&lt;/code&gt; |  or           |   No         
+| `x &amp;&amp; y`                      |  and          |   No         
+|`xor(x,y)`                     |  exclusive or |   Yes        
+
+
+---
+
+## Vectorized?
+
+
+```r
+x = c(TRUE,FALSE,TRUE)
+y = c(FALSE,TRUE,TRUE)
+```
+
+.pull-left[
+
+```r
+x | y
+```
+
+```
+## [1] TRUE TRUE TRUE
+```
+
+```r
+x || y
+```
+
+```
+## [1] TRUE
+```
+]
+
+.pull-right[
+
+```r
+x &amp; y
+```
+
+```
+## [1] FALSE FALSE  TRUE
+```
+
+```r
+x &amp;&amp; y
+```
+
+```
+## [1] FALSE
+```
+]
+
+---
+
+## Vectorization and arithmatic
+
+Almost all of the basic mathematical operations (and many other functions) in R are vectorized as well.
+
+.pull-left[
+
+```r
+c(1,2,3) + c(3,2,1)
+```
+
+```
+## [1] 4 4 4
+```
+
+```r
+c(1,2,3) / c(3,2,1)
+```
+
+```
+## [1] 0.3333333 1.0000000 3.0000000
+```
+]
+
+.pull-right[
+
+```r
+log(c(1, 3, 0))
+```
+
+```
+## [1] 0.000000 1.098612     -Inf
+```
+
+```r
+sin(c(1,2,3))
+```
+
+```
+## [1] 0.8414710 0.9092974 0.1411200
+```
+]
+
+
+
+---
+
+## Length coercion
+
+
+```r
+x = c(TRUE,FALSE,TRUE)
+y = c(TRUE)
+z = c(FALSE,TRUE)
+```
+
+--
+
+.pull-left[
+
+```r
+x | y
+```
+
+```
+## [1] TRUE TRUE TRUE
+```
+
+```r
+x &amp; y
+```
+
+```
+## [1]  TRUE FALSE  TRUE
+```
+]
+
+--
+
+.pull-right[
+
+```r
+y | z
+```
+
+```
+## [1] TRUE TRUE
+```
+
+```r
+y &amp; z
+```
+
+```
+## [1] FALSE  TRUE
+```
+]
+
+--
+
+
+```r
+x | z
+```
+
+```
+## Warning in x | z: longer object length is not a multiple of shorter object
+## length
+```
+
+```
+## [1] TRUE TRUE TRUE
+```
+
+---
+
+## Comparisons
+
+  Operator  |  Comparison                |  Vectorized?
+:----------:|:--------------------------:|:----------------:
+ `x &lt; y`    |  less than                 |  Yes
+ `x &gt; y`    |  greater than              |  Yes
+ `x &lt;= y`   |  less than or equal to     |  Yes
+ `x &gt;= y`   |  greater than or equal to  |  Yes
+ `x != y`   |  not equal to              |  Yes
+ `x == y`   |  equal to                  |  Yes
+ `x %in% y` |  contains                  |  Yes (over `x`)
+
+
+---
+
+## Comparisons
+
+
+```r
+x = c("A","B","C")
+z = c("A")
+```
+
+.pull-left[
+
+```r
+x == z
+```
+
+```
+## [1]  TRUE FALSE FALSE
+```
+
+```r
+x != z
+```
+
+```
+## [1] FALSE  TRUE  TRUE
+```
+
+```r
+x &gt; z
+```
+
+```
+## [1] FALSE  TRUE  TRUE
+```
+]
+
+--
+
+.pull-right[
+
+```r
+x %in% z
+```
+
+```
+## [1]  TRUE FALSE FALSE
+```
+
+```r
+z %in% x
+```
+
+```
+## [1] TRUE
+```
+]
+ 
+
+---
+
+## Conditional Control Flow
+
+Conditional execution of code blocks is achieved via `if` statements. 
+
+
+```r
+x = c(1,3)
+```
+
+--
+
+
+```r
+if (3 %in% x)
+  print("This!")
+```
+
+```
+## [1] "This!"
+```
+
+--
+
+
+```r
+if (1 %in% x)
+  print("That!")
+```
+
+```
+## [1] "That!"
+```
+
+--
+
+
+```r
+if (5 %in% x)
+  print("Other!")
+```
+
+
+---
+
+## Note `if` is not vectorized
+
+
+```r
+x = c(1,3)
+```
+
+--
+
+
+```r
+if (x %in% 3)
+  print("Now Here!")
+```
+
+```
+## Warning in if (x %in% 3) print("Now Here!"): the condition has length &gt; 1 and
+## only the first element will be used
+```
+
+--
+
+
+```r
+if (x %in% 1)
+  print("Now Here!")
+```
+
+```
+## Warning in if (x %in% 1) print("Now Here!"): the condition has length &gt; 1 and
+## only the first element will be used
+```
+
+```
+## [1] "Now Here!"
+```
+
+
+---
+
+## Collapsing logical vectors
+
+There are a couple of helper functions for collapsing a logical vector down to a single value: `any`, `all`
+
+
+```r
+x = c(3,4,1)
+```
+
+.pull-left[
+
+```r
+x &gt;= 2
+```
+
+```
+## [1]  TRUE  TRUE FALSE
+```
+
+```r
+any(x &gt;= 2)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+all(x &gt;= 2)
+```
+
+```
+## [1] FALSE
+```
+]
+
+.pull-right[
+
+```r
+x &lt;= 4
+```
+
+```
+## [1] TRUE TRUE TRUE
+```
+
+```r
+any(x &lt;= 4)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+all(x &lt;= 4)
+```
+
+```
+## [1] TRUE
+```
+]
+
+
+---
+
+## Nesting Conditionals
+
+.pull-left[
+
+```r
+x = 3
+if (x &lt; 0) {
+  "Negative"
+} else if (x &gt; 0) {
+  "Positive"
+} else {
+  "Zero"
+}
+```
+
+```
+## [1] "Positive"
+```
+]
+
+.pull-right[
+
+```r
+x = 0
+if (x &lt; 0) {
+  "Negative"
+} else if (x &gt; 0) {
+  "Positive"
+} else {
+  "Zero"
+}
+```
+
+```
+## [1] "Zero"
+```
+]
+
+---
+class: middle
+count: false
+
+# Error Checking
+
+---
+
+## `stop` and `stopifnot`
+
+Often we want to validate user input or function arguments - if our assumptions are not met then we often want to report the error and stop execution. 
+
+
+```r
+ok = FALSE
+if (!ok)
+  stop("Things are not ok.")
+```
+
+```
+## Error in eval(expr, envir, enclos): Things are not ok.
+```
+
+```r
+stopifnot(ok)
+```
+
+```
+## Error: ok is not TRUE
+```
+
+*Note* - an error (like the one generated by `stop`) will prevent an RMarkdown document from compiling unless `error=TRUE` is set for that code chunk
+
+---
+
+## Style choices
+
+
+.pull-left[
+Do stuff:
+
+```r
+if (condition_one) {
+  ##
+  ## Do stuff
+  ##
+} else if (condition_two) {
+  ##
+  ## Do other stuff
+  ##
+} else if (condition_error) {
+  stop("Condition error occured")
+}
+```
+]
+
+.pull-right[
+Do stuff (better):
+
+```r
+# Do stuff better
+if (condition_error) {
+  stop("Condition error occured")
+}
+
+if (condition_one) {
+  ##
+  ## Do stuff
+  ##
+} else if (condition_two) {
+  ##
+  ## Do other stuff
+  ##
+}
+```
+]
+
+---
+class: middle, center
+
+# Missing Values
+
+---
+
+## Missing Values
+
+R uses `NA` to represent missing values in its data structures, what may not be obvious is that there are different `NA`s for the different types.
+
+.pull-left[
+
+```r
+typeof(NA)
+```
+
+```
+## [1] "logical"
+```
+
+```r
+typeof(NA+1)
+```
+
+```
+## [1] "double"
+```
+
+```r
+typeof(NA+1L)
+```
+
+```
+## [1] "integer"
+```
+]
+
+.pull-right[
+
+```r
+typeof(NA_character_)
+```
+
+```
+## [1] "character"
+```
+
+```r
+typeof(NA_real_)
+```
+
+```
+## [1] "double"
+```
+
+```r
+typeof(NA_integer_)
+```
+
+```
+## [1] "integer"
+```
+]
+
+---
+
+## Stickiness of Missing Values
+
+Because `NA`s represent missing values it makes sense that any calculation using them should also be missing.
+
+.pull-left[
+
+```r
+1 + NA
+```
+
+```
+## [1] NA
+```
+
+```r
+1 / NA
+```
+
+```
+## [1] NA
+```
+
+```r
+NA * 5
+```
+
+```
+## [1] NA
+```
+]
+
+.pull-right[
+
+```r
+mean(c(1,2,3,NA))
+```
+
+```
+## [1] NA
+```
+
+```r
+sqrt(NA)
+```
+
+```
+## [1] NA
+```
+
+```r
+3^NA
+```
+
+```
+## [1] NA
+```
+]
+
+---
+
+## Conditionals and missing values
+
+`NA`s can be problematic in some cases (particularly for control flow)
+
+
+```r
+1 == NA
+```
+
+```
+## [1] NA
+```
+
+--
+
+
+```r
+if (2 != NA)
+  "Here"
+```
+
+```
+## Error in if (2 != NA) "Here": missing value where TRUE/FALSE needed
+```
+
+--
+
+```r
+if (all(c(1,2,NA,4) &gt;= 1))
+  "There"
+```
+
+```
+## Error in if (all(c(1, 2, NA, 4) &gt;= 1)) "There": missing value where TRUE/FALSE needed
+```
+
+--
+
+
+```r
+if (any(c(1,2,NA,4) &gt;= 1))
+  "There"
+```
+
+```
+## [1] "There"
+```
+
+
+---
+
+## Testing for `NA`
+
+To explicitly test if a value is missing it is necessary to use `is.na` (often along with `any` or `all`).
+
+.pull-left[
+
+```r
+is.na(NA)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+is.na(1)
+```
+
+```
+## [1] FALSE
+```
+
+```r
+is.na(c(1,2,3,NA))
+```
+
+```
+## [1] FALSE FALSE FALSE  TRUE
+```
+]
+
+.pull-right[
+
+```r
+any(is.na(c(1,2,3,NA)))
+```
+
+```
+## [1] TRUE
+```
+
+```r
+all(is.na(c(1,2,3,NA)))
+```
+
+```
+## [1] FALSE
+```
+]
+
+
+---
+
+## Other Special (double) values
+
+* `NaN` - Not a number
+
+* `Inf` - Positive infinity
+
+* `-Inf` - Negative infinity
+
+.pull-left[
+
+```r
+pi / 0
+```
+
+```
+## [1] Inf
+```
+
+```r
+0 / 0
+```
+
+```
+## [1] NaN
+```
+
+```r
+1/0 + 1/0
+```
+
+```
+## [1] Inf
+```
+]
+
+.pull-right[
+
+```r
+1/0 - 1/0
+```
+
+```
+## [1] NaN
+```
+
+```r
+NaN / NA
+```
+
+```
+## [1] NaN
+```
+
+```r
+NaN * NA
+```
+
+```
+## [1] NaN
+```
+]
+
+
+---
+
+## Testing for `inf` and `NaN`
+
+`NaN` and `Inf` don't have the same testing issues that `NA` has, but there are still convenience functions for testing for 
+
+.pull-left[
+
+```r
+NA
+```
+
+```
+## [1] NA
+```
+
+```r
+1/0+1/0
+```
+
+```
+## [1] Inf
+```
+
+```r
+1/0-1/0
+```
+
+```
+## [1] NaN
+```
+]
+
+.pull-right[
+
+```r
+is.finite(NA)
+```
+
+```
+## [1] FALSE
+```
+
+```r
+is.finite(1/0+1/0)
+```
+
+```
+## [1] FALSE
+```
+
+```r
+is.finite(1/0-1/0)
+```
+
+```
+## [1] FALSE
+```
+
+```r
+is.nan(1/0-1/0)
+```
+
+```
+## [1] TRUE
+```
+]
+
+
+---
+
+## Coercion for infinity and NaN
+
+First remember that `Inf`, `-Inf`, and `NaN` have type double, however their coercion behavior is not the same as for other double values.
+
+
+```r
+as.integer(Inf)
+```
+
+```
+## Warning: NAs introduced by coercion to integer range
+```
+
+```
+## [1] NA
+```
+
+```r
+as.integer(NaN)
+```
+
+```
+## [1] NA
+```
+
+.pull-left[
+
+```r
+as.logical(Inf)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+as.logical(NaN)
+```
+
+```
+## [1] NA
+```
+]
+
+.pull-right[
+
+```r
+as.character(Inf)
+```
+
+```
+## [1] "Inf"
+```
+
+```r
+as.character(NaN)
+```
+
+```
+## [1] "NaN"
+```
+]
+
+---
+
+## Exercise 1
+
+**Part 1**
+
+What is the type of the following vectors? Explain why they have that type.
+
+* `c(1, NA+1L, "C")`
+* `c(1L / 0, NA)`
+* `c(1:3, 5)`
+* `c(3L, NaN+1L)`
+* `c(NA, TRUE)`
+
+
+**Part 2**
+
+Considering only the four (common) data types, what is R's implicit type conversion hierarchy (from highest priority to lowest priority)? 
+
+*Hint* - think about the pairwise interactions between types.
+
+
+---
+class: middle
+count: false
+
+# Loops
+
+---
+
+## `for` loops
+
+Simplest, and most common type of loop in R - given a vector iterate through the elements and evaluate the code block for each.
+
+
+
+```r
+res = c()
+for(x in 1:10) {
+  res = c(res, x^2)
+}
+res
+```
+
+```
+##  [1]   1   4   9  16  25  36  49  64  81 100
+```
+
+--
+
+
+```r
+res = c()
+for(y in list(1:3, LETTERS[1:7], c(TRUE,FALSE))) {
+  res = c(res, length(y))
+}
+res
+```
+
+```
+## [1] 3 7 2
+```
+
+&lt;br/&gt;
+
+*Note* - the code above is terrible for several reasons, you should never write anything that looks like this
+
+---
+
+## `while` loops
+
+Repeat until the given condition is **not** met (i.e. evaluates to `FALSE`)
+
+
+```r
+i = 1
+res = rep(NA,10)
+
+while (i &lt;= 10) {
+  res[i] = i^2
+  i = i+1
+}
+
+res
+```
+
+```
+##  [1]   1   4   9  16  25  36  49  64  81 100
+```
+
+---
+
+## `repeat` loops
+
+Repeat until `break`
+
+
+```r
+i = 1
+res = rep(NA,10)
+
+repeat {
+  res[i] = i^2
+  i = i+1
+  if (i &gt; 10)
+    break
+}
+
+res
+```
+
+```
+##  [1]   1   4   9  16  25  36  49  64  81 100
+```
+
+---
+class: split-50
+
+## Special keywords - `break` and `next`
+
+These are special actions that only work *inside* of a loop
+
+* `break` - ends the current *loop* (inner-most)
+* `next` - ends the current *iteration*
+
+.pull-left[
+
+```r
+res = c()
+for(i in 1:10) {
+    if (i %% 2 == 0)
+        break
+    res = c(res, i)
+    print(res)
+}
+```
+
+```
+## [1] 1
+```
+]
+
+.pull-right[
+
+```r
+res = c()
+for(i in 1:10) {
+    if (i %% 2 == 0)
+        next
+    res = c(res,i)
+    print(res)
+}
+```
+
+```
+## [1] 1
+## [1] 1 3
+## [1] 1 3 5
+## [1] 1 3 5 7
+## [1] 1 3 5 7 9
+```
+]
+
+
+---
+
+## Some helper functions
+
+Often we want to use a loop across the indexes of an object and not the elements themselves. There are several useful functions to help you do this: `:`, `length`, `seq`, `seq_along`, `seq_len`, etc.
+
+.pull-left[
+
+```r
+4:7
+```
+
+```
+## [1] 4 5 6 7
+```
+
+```r
+length(4:7)
+```
+
+```
+## [1] 4
+```
+
+```r
+seq(4,7)
+```
+
+```
+## [1] 4 5 6 7
+```
+]
+
+.pull-right[
+
+```r
+seq_along(4:7)
+```
+
+```
+## [1] 1 2 3 4
+```
+
+```r
+seq_len(length(4:7))
+```
+
+```
+## [1] 1 2 3 4
+```
+
+```r
+seq(4,7,by=2)
+```
+
+```
+## [1] 4 6
+```
+]
+
+---
+
+## Exercise 2
+
+Below is a vector containing all prime numbers between 2 and 100:
+
+.center[
+```r
+primes = c( 2,  3,  5,  7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 
+      43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97)
+```
+]
+
+If you were given the vector `x = c(3,4,12,19,23,51,61,63,78)`, write the R code necessary to print only the values of `x` that are *not* prime (without using subsetting or the `%in%` operator). 
+
+Your code should use *nested* loops to iterate through the vector of primes and `x`.
+
+
+
+
+---
+count: false
+
+# Acknowledgments
+
+Above materials are derived in part from the following sources:
+
+* Hadley Wickham - [Advanced R](http://adv-r.had.co.nz/)
+* [R Language Definition](http://stat.ethz.ch/R-manual/R-devel/doc/manual/R-lang.html)
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
