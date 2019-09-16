@@ -1,0 +1,139 @@
+---
+title: "Data types in R"
+author: "Colin Rundel"
+date: "2019-01-17"
+output:
+  xaringan::moon_reader:
+    css: "slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+exclude: true
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+options(
+  htmltools.dir.version = FALSE, # for blogdown
+  width=80
+)
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+```
+
+
+
+---
+class: middle
+count: false
+
+# Generic Vectors
+
+
+---
+
+## Lists
+
+Lists are _generic vectors_, in that they are 1 dimensional (i.e. have a length) and can contain any type of R object.
+
+```{r}
+list("A", c(TRUE,FALSE), (1:4)/2, function(x) x^2)
+```
+
+
+---
+
+## Structure
+
+Often we want a more compact representation of a complex object, the `str` function is useful for this particular task
+
+```{r}
+str( list("A", c(TRUE,FALSE), (1:4)/2, function(x) x^2) )
+```
+
+
+---
+
+## Recursive lists
+
+Lists can contain other lists, meaning they don't have to be flat
+
+```{r}
+str( list(1, list(2, list(3, 4), 5)) )
+```
+
+
+---
+
+## List Coercion
+
+By default a vector will be coerced to a list (as a list is more generic) if needed
+
+```{r}
+str( c(1, list(4, list(6, 7))) )
+```
+
+--
+
+We can coerce a list into an atomic vector using `unlist` - the usual type coercion rules then apply to determine its type.
+
+```{r}
+unlist(list(1:3, list(4:5, 6)))
+unlist( list(1, list(2, list(3, "Hello"))) )
+```
+
+
+---
+
+## Named lists
+
+Because of their more complex structure we often want to name the elements of a list (we can also do this with vectors). This can make reading and accessing the list more straight forward.
+
+```{r}
+str(list(A = 1, B = list(C = 2, D = 3)))
+list("knock knock" = "who's there?")
+names(list(ABC=1, DEF=list(H=2, I=3)))
+```
+
+
+---
+
+## Exercise 2
+
+Represent the following JSON data as a list in R.
+
+```json
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "age": 25,
+  "address": 
+  {
+    "streetAddress": "21 2nd Street",
+    "city": "New York",
+    "state": "NY",
+    "postalCode": 10021
+  },
+  "phoneNumber": 
+  [
+    {
+      "type": "home",
+      "number": "212 555-1239"
+    },
+    {
+      "type": "fax",
+      "number": "646 555-4567"
+    }
+  ]
+}
+```
+
+---
+
+# Acknowledgments
+## Acknowledgments
+
+Above materials are derived in part from the following sources:
+
+* Hadley Wickham - [Advanced R](http://adv-r.had.co.nz/)
+* [R Language Definition](http://stat.ethz.ch/R-manual/R-devel/doc/manual/R-lang.html)

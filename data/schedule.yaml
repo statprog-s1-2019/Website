@@ -5,6 +5,7 @@ schedule:
   day: 0
   lecture: "Introduction <br/> Logic and Types in R <br/> git & Github"
   slides: Lec01
+  screencast: https://youtu.be/pTYSZ7a6YsM
   readings:
   - text: Tidyverse style guide
     link: https://style.tidyverse.org/
