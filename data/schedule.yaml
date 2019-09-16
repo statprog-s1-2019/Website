@@ -4,6 +4,7 @@ schedule:
 - week: 1
   day: 0
   lecture: "Introduction <br/> Logic and Types in R <br/> git & Github"
+  slides: Lec01
   readings:
   - text: Tidyverse style guide
     link: https://style.tidyverse.org/
