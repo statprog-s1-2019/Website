@@ -130,18 +130,40 @@ vs.
 
 - Any recycled code that is discovered and is not explicitly cited will be treated as plagiarism. 
 
+---
+
+## Noteable / RStudio
+
+<br/><br/>
+
+.center[
+```{r echo=FALSE, out.width="50%"}
+knitr::include_graphics("imgs/noteable-logo.png")
+```
+
+<br/><br/>
+
+```{r echo=FALSE, out.width="50%"}
+knitr::include_graphics("imgs/RStudio-Logo.png")
+```
+]
+
+<br/>
+
+Login via the link on the left-side menu in Learn.
+
 
 ---
 class: middle
 count: false
 
-# (Almost) <br/> Everything is a Vector
+# In R (almost) <br/> everything is a vector
 
 ---
 
 ## Vectors
 
-The fundamental building block of data in R are vectors (collections of related values, objects, other data structures, etc).
+The fundamental building block of data in R are vectors (collections of related values, objects, data structures, functions, etc).
 
 --
 <br/>
@@ -150,7 +172,7 @@ R has two types of vectors:
 
 * **atomic** vectors 
 
-    - homogeneous collections of the *same* type (e.g. all logical values, all numbers, or all character strings).
+    - homogeneous collections of the *same* type (e.g. all `true`/`false` values, all numbers, or all character strings).
 
 * **generic** vectors
   
@@ -278,6 +300,12 @@ c("Hello", "World!")
 --
 
 ```{r}
+c(1, 1:10)
+```
+
+--
+
+```{r}
 c(1,c(2, c(3)))
 ```
 
@@ -370,7 +398,7 @@ is.vector(list(1,2,3))
 
 ## Type Coercion
 
-R is a dynamically typed language -- it will automatically convert between most type without raising warnings or errors.
+R is a dynamically typed language -- it will automatically convert between most types without raising warnings or errors.
 
 ```{r}
 c(1,"Hello")
@@ -448,6 +476,8 @@ class: middle
 ---
 
 ## Logical (boolean) operators
+
+<br/><br/>
 
 |  Operator                     |  Operation    |  Vectorized? 
 |:-----------------------------:|:-------------:|:------------:
@@ -844,14 +874,15 @@ To explicitly test if a value is missing it is necessary to use `is.na` (often a
 
 .pull-left[
 ```{r}
+NA == NA
 is.na(NA)
 is.na(1)
-is.na(c(1,2,3,NA))
 ```
 ]
 
 .pull-right[
 ```{r}
+is.na(c(1,2,3,NA))
 any(is.na(c(1,2,3,NA)))
 all(is.na(c(1,2,3,NA)))
 ```

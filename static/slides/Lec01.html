@@ -129,18 +129,36 @@ vs.
 
 - Any recycled code that is discovered and is not explicitly cited will be treated as plagiarism. 
 
+---
+
+## Noteable / RStudio
+
+&lt;br/&gt;&lt;br/&gt;
+
+.center[
+&lt;img src="imgs/noteable-logo.png" width="50%" /&gt;
+
+&lt;br/&gt;&lt;br/&gt;
+
+&lt;img src="imgs/RStudio-Logo.png" width="50%" /&gt;
+]
+
+&lt;br/&gt;
+
+Login via the link on the left-side menu in Learn.
+
 
 ---
 class: middle
 count: false
 
-# (Almost) &lt;br/&gt; Everything is a Vector
+# In R (almost) &lt;br/&gt; everything is a vector
 
 ---
 
 ## Vectors
 
-The fundamental building block of data in R are vectors (collections of related values, objects, other data structures, etc).
+The fundamental building block of data in R are vectors (collections of related values, objects, data structures, functions, etc).
 
 --
 &lt;br/&gt;
@@ -149,7 +167,7 @@ R has two types of vectors:
 
 * **atomic** vectors 
 
-    - homogeneous collections of the *same* type (e.g. all logical values, all numbers, or all character strings).
+    - homogeneous collections of the *same* type (e.g. all `true`/`false` values, all numbers, or all character strings).
 
 * **generic** vectors
   
@@ -364,6 +382,17 @@ c("Hello", "World!")
 
 ```
 ## [1] "Hello"  "World!"
+```
+
+--
+
+
+```r
+c(1, 1:10)
+```
+
+```
+##  [1]  1  1  2  3  4  5  6  7  8  9 10
 ```
 
 --
@@ -601,7 +630,7 @@ is.vector(list(1,2,3))
 
 ## Type Coercion
 
-R is a dynamically typed language -- it will automatically convert between most type without raising warnings or errors.
+R is a dynamically typed language -- it will automatically convert between most types without raising warnings or errors.
 
 
 ```r
@@ -756,6 +785,8 @@ class: middle
 ---
 
 ## Logical (boolean) operators
+
+&lt;br/&gt;&lt;br/&gt;
 
 |  Operator                     |  Operation    |  Vectorized? 
 |:-----------------------------:|:-------------:|:------------:
@@ -1456,6 +1487,14 @@ To explicitly test if a value is missing it is necessary to use `is.na` (often a
 .pull-left[
 
 ```r
+NA == NA
+```
+
+```
+## [1] NA
+```
+
+```r
 is.na(NA)
 ```
 
@@ -1470,6 +1509,9 @@ is.na(1)
 ```
 ## [1] FALSE
 ```
+]
+
+.pull-right[
 
 ```r
 is.na(c(1,2,3,NA))
@@ -1478,9 +1520,6 @@ is.na(c(1,2,3,NA))
 ```
 ## [1] FALSE FALSE FALSE  TRUE
 ```
-]
-
-.pull-right[
 
 ```r
 any(is.na(c(1,2,3,NA)))

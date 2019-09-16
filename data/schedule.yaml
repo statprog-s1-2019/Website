@@ -63,32 +63,32 @@ schedule:
 
 - week: 6
   day: 0
-  lecture: "TBD"
+  lecture: "Simulation"
   readings:
   notes: "HW3 out"
 
 
 - week: 7
   day: 0
-  lecture: "TBD"
+  lecture: "Bootstrapping"
   readings:
   notes: "" 
 
 - week: 8
   day: 0
-  lecture: "TBD"
+  lecture: "Power analysis"
   readings:
   notes: "HW4 out"
 
 - week: 9
   day: 0
-  lecture: "TBD"
+  lecture: "Permutation tests"
   readings:
   notes: "" 
 
 - week: 10
   day: 0
-  lecture: "TDB"
+  lecture: "Optimisation"
   readings:
   notes: "Project 2 out"
 
