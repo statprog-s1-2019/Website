@@ -47,4 +47,8 @@ params:
     - name: Dr. Colin Rundel
       office: 2256 JCMB
       email: colin.rundel@ed.ac.uk
+      hours: Mondays 11 - 1
+    - name: Dr. Gordon Ross
+      office: 4608 JCMB
+      email: gordon.ross@ed.ac.uk
       hours: TBD
