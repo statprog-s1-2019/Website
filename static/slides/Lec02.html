@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
   <head>
-    <title>Data types in R</title>
+    <title>Attributes, Classes, S3, and Subsetting</title>
     <meta charset="utf-8" />
     <meta name="author" content="Colin Rundel" />
     <meta name="date" content="2019-01-17" />
@@ -13,7 +13,7 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
-# Data types in R
+# Attributes, Classes, S3, and Subsetting
 ### Colin Rundel
 ### 2019-01-17
 
@@ -29,18 +29,17 @@ exclude: true
 class: middle
 count: false
 
-# Generic Vectors
-
+# Generic Vectors (Briefly)
 
 ---
 
 ## Lists
 
-Lists are _generic vectors_, in that they are 1 dimensional (i.e. have a length) and can contain any type of R object.
+Lists are _generic vectors_, as such they are 1 dimensional (i.e. have a length) and can contain any type of R object.
 
 
 ```r
-list("A", c(TRUE,FALSE), (1:4)/2, function(x) x^2)
+list("A", c(TRUE,FALSE), (1:4)/2, list(1:2), function(x) x^2)
 ```
 
 ```
@@ -54,53 +53,116 @@ list("A", c(TRUE,FALSE), (1:4)/2, function(x) x^2)
 ## [1] 0.5 1.0 1.5 2.0
 ## 
 ## [[4]]
+## [[4]][[1]]
+## [1] 1 2
+## 
+## 
+## [[5]]
 ## function(x) x^2
 ```
 
 
 ---
 
-## Structure
+## `str`ucture
 
 Often we want a more compact representation of a complex object, the `str` function is useful for this particular task
 
 
 ```r
-str( list("A", c(TRUE,FALSE), (1:4)/2, function(x) x^2) )
+str(1:4)
 ```
 
 ```
-## List of 4
+##  int [1:4] 1 2 3 4
+```
+
+
+```r
+str( list("A", c(TRUE,FALSE), (1:4)/2, list(1:2), function(x) x^2) )
+```
+
+```
+## List of 5
 ##  $ : chr "A"
 ##  $ : logi [1:2] TRUE FALSE
 ##  $ : num [1:4] 0.5 1 1.5 2
+##  $ :List of 1
+##   ..$ : int [1:2] 1 2
 ##  $ :function (x)  
-##   ..- attr(*, "srcref")= 'srcref' int [1:8] 1 40 1 54 40 54 1 1
-##   .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x7f91004120c8&gt;
+##   ..- attr(*, "srcref")= 'srcref' int [1:8] 1 51 1 65 51 65 1 1
+##   .. ..- attr(*, "srcfile")=Classes 'srcfilecopy', 'srcfile' &lt;environment: 0x7f85f193fa48&gt;
 ```
 
 
 ---
 
-## Recursive lists
+## Lists as "trees"
 
 Lists can contain other lists, meaning they don't have to be flat
 
 
 ```r
-str( list(1, list(2, list(3, 4), 5)) )
+str( list(a=1, b=list(c=2, d=list(f=3, g=4), e=5)) )
 ```
 
 ```
 ## List of 2
-##  $ : num 1
-##  $ :List of 3
-##   ..$ : num 2
-##   ..$ :List of 2
-##   .. ..$ : num 3
-##   .. ..$ : num 4
-##   ..$ : num 5
+##  $ a: num 1
+##  $ b:List of 3
+##   ..$ c: num 2
+##   ..$ d:List of 2
+##   .. ..$ f: num 3
+##   .. ..$ g: num 4
+##   ..$ e: num 5
 ```
+
+--
+
+.pull-left[
+
+```r
+json = '{
+  "firstName": "John",
+  "lastName": "Smith",
+  "isAlive": true,
+  "age": 27,
+  "phoneNumbers": [
+    {
+      "type": "home",
+      "number": "212 555-1234"
+    },{
+      "type": "mobile",
+      "number": "123 456-7890"
+    }
+  ]
+}'
+```
+]
+
+--
+
+.pull-right[
+
+```r
+str( jsonlite::fromJSON(json, simplifyVector = FALSE) )
+```
+
+```
+## List of 5
+##  $ firstName   : chr "John"
+##  $ lastName    : chr "Smith"
+##  $ isAlive     : logi TRUE
+##  $ age         : int 27
+##  $ phoneNumbers:List of 2
+##   ..$ :List of 2
+##   .. ..$ type  : chr "home"
+##   .. ..$ number: chr "212 555-1234"
+##   ..$ :List of 2
+##   .. ..$ type  : chr "mobile"
+##   .. ..$ number: chr "123 456-7890"
+```
+]
 
 
 ---
@@ -125,8 +187,18 @@ str( c(1, list(4, list(6, 7))) )
 
 --
 
+&lt;br/&gt;
+
 We can coerce a list into an atomic vector using `unlist` - the usual type coercion rules then apply to determine its type.
 
+
+```r
+unlist(list(1:3, 4:5, 6))
+```
+
+```
+## [1] 1 2 3 4 5 6
+```
 
 ```r
 unlist(list(1:3, list(4:5, 6)))
@@ -144,79 +216,2586 @@ unlist( list(1, list(2, list(3, "Hello"))) )
 ## [1] "1"     "2"     "3"     "Hello"
 ```
 
+---
+class: middle
+count: false
+
+# Attributes
 
 ---
 
-## Named lists
+## Attributes
 
-Because of their more complex structure we often want to name the elements of a list (we can also do this with vectors). This can make reading and accessing the list more straight forward.
+Attributes are metadata that can be attached to objects in R. Some are special (e.g. `class`, `comment`, `dim`, `dimnames`, `names`, etc.) and change the way in which an object is treated by R. 
+
+Attributes are implemented as a named list that are accessed (get and set) individually via the `attr` function and collectively via the `attributes` function.
 
 
 ```r
-str(list(A = 1, B = list(C = 2, D = 3)))
+(x = c(L=1,M=2,N=3))
+```
+
+```
+## L M N 
+## 1 2 3
+```
+
+--
+
+
+```r
+str(x)
+```
+
+```
+##  Named num [1:3] 1 2 3
+##  - attr(*, "names")= chr [1:3] "L" "M" "N"
+```
+
+--
+
+
+```r
+attributes(x)
+```
+
+```
+## $names
+## [1] "L" "M" "N"
+```
+
+```r
+str(attributes(x))
+```
+
+```
+## List of 1
+##  $ names: chr [1:3] "L" "M" "N"
+```
+
+---
+
+
+```r
+attr(x,"names") = c("A","B","C")
+x
+```
+
+```
+## A B C 
+## 1 2 3
+```
+
+--
+
+
+```r
+names(x)
+```
+
+```
+## [1] "A" "B" "C"
+```
+
+```r
+names(x) = c("Z","Y","X")
+x
+```
+
+```
+## Z Y X 
+## 1 2 3
+```
+
+--
+
+.pull-left[
+
+```r
+names(x) = 1:3
+x
+```
+
+```
+## 1 2 3 
+## 1 2 3
+```
+
+```r
+attributes(x)
+```
+
+```
+## $names
+## [1] "1" "2" "3"
+```
+]
+
+.pull-right[
+
+```r
+names(x) = c(TRUE, FALSE, TRUE)
+x
+```
+
+```
+##  TRUE FALSE  TRUE 
+##     1     2     3
+```
+
+```r
+attributes(x)
+```
+
+```
+## $names
+## [1] "TRUE"  "FALSE" "TRUE"
+```
+]
+
+
+---
+
+## Factors
+
+Factor objects are how R represents categorical data (e.g. a variable where there are a fixed # of possible outcomes).
+
+
+```r
+(x = factor(c("Sunny", "Cloudy", "Rainy", "Cloudy", "Cloudy")))
+```
+
+```
+## [1] Sunny  Cloudy Rainy  Cloudy Cloudy
+## Levels: Cloudy Rainy Sunny
+```
+
+--
+
+
+```r
+str(x)
+```
+
+```
+##  Factor w/ 3 levels "Cloudy","Rainy",..: 3 1 2 1 1
+```
+
+--
+
+
+```r
+typeof(x)
+```
+
+```
+## [1] "integer"
+```
+
+---
+
+## Composition
+
+A factor is just an integer vector with two attributes: `class = "factor"` and `levels` a character vector with the possible levels.
+
+
+```r
+x
+```
+
+```
+## [1] Sunny  Cloudy Rainy  Cloudy Cloudy
+## Levels: Cloudy Rainy Sunny
+```
+
+```r
+attributes(x)
+```
+
+```
+## $levels
+## [1] "Cloudy" "Rainy"  "Sunny" 
+## 
+## $class
+## [1] "factor"
+```
+
+--
+
+&lt;br/&gt;
+
+We can build our own factor from scratch using,
+
+
+```r
+y = c(3L, 1L, 2L, 1L, 1L)
+attr(y, "levels") = c("Cloudy", "Rainy", "Sunny")
+attr(y, "class") = "factor"
+y
+```
+
+```
+## [1] Sunny  Cloudy Rainy  Cloudy Cloudy
+## Levels: Cloudy Rainy Sunny
+```
+
+---
+
+## 
+
+Knowning factors are stored as integers help explain some of their more interesting behaviors:
+
+
+```r
+x+1
+```
+
+```
+## Warning in Ops.factor(x, 1): '+' not meaningful for factors
+```
+
+```
+## [1] NA NA NA NA NA
+```
+
+```r
+is.integer(x)
+```
+
+```
+## [1] FALSE
+```
+
+```r
+as.integer(x)
+```
+
+```
+## [1] 3 1 2 1 1
+```
+
+```r
+as.character(x)
+```
+
+```
+## [1] "Sunny"  "Cloudy" "Rainy"  "Cloudy" "Cloudy"
+```
+
+```r
+as.logical(x)
+```
+
+```
+## [1] NA NA NA NA NA
+```
+
+ 
+
+---
+class: middle
+count: false
+
+# Data Frames
+
+---
+
+## Data Frames
+
+A data frame is how R handles heterogeneous tabular data (i.e. rows and columns) and is one of the most commonly used data structure in R.
+
+
+```r
+(df = data.frame(
+  x = 1:3, 
+  y = c("a", "b", "c"),
+  z = c(TRUE)
+))
+```
+
+```
+##   x y    z
+## 1 1 a TRUE
+## 2 2 b TRUE
+## 3 3 c TRUE
+```
+
+--
+
+R represents data frames using a list of equal length vectors (usually atomic, but you can use lists as well).
+
+
+```r
+str(df)
+```
+
+```
+## 'data.frame':	3 obs. of  3 variables:
+##  $ x: int  1 2 3
+##  $ y: Factor w/ 3 levels "a","b","c": 1 2 3
+##  $ z: logi  TRUE TRUE TRUE
+```
+
+---
+
+
+```r
+typeof(df)
+```
+
+```
+## [1] "list"
+```
+
+```r
+class(df)
+```
+
+```
+## [1] "data.frame"
+```
+
+```r
+attributes(df)
+```
+
+```
+## $names
+## [1] "x" "y" "z"
+## 
+## $class
+## [1] "data.frame"
+## 
+## $row.names
+## [1] 1 2 3
+```
+
+---
+
+## Roll your own data.frame
+
+
+```r
+df2 = list(x = 1:3, y = factor(c("a", "b", "c")), z = c(TRUE, TRUE, TRUE))
+```
+
+--
+
+.pull-left[
+
+```r
+attr(df2,"class") = "data.frame"
+df2
+```
+
+```
+## [1] x y z
+## &lt;0 rows&gt; (or 0-length row.names)
+```
+]
+
+--
+
+.pull-right[
+
+```r
+attr(df2,"row.names") = 1:3
+df2
+```
+
+```
+##   x y    z
+## 1 1 a TRUE
+## 2 2 b TRUE
+## 3 3 c TRUE
+```
+]
+
+
+```r
+str(df2)
+```
+
+```
+## 'data.frame':	3 obs. of  3 variables:
+##  $ x: int  1 2 3
+##  $ y: Factor w/ 3 levels "a","b","c": 1 2 3
+##  $ z: logi  TRUE TRUE TRUE
+```
+
+```r
+identical(df, df2)
+```
+
+```
+## [1] TRUE
+```
+
+---
+
+## Strings (Characters) vs Factors
+
+By default character vectors will be convert into factors when they are included in a data frame. 
+
+Sometimes this is useful, usually it isn't -- either way it is important to know what type/class you are working with. This behavior can be changed using the `stringsAsFactors` argument to data.frame and related functions.
+
+
+```r
+df = data.frame(x = 1:3, y = c("a", "b", "c"), stringsAsFactors = FALSE)
+df
+```
+
+```
+##   x y
+## 1 1 a
+## 2 2 b
+## 3 3 c
+```
+
+```r
+str(df)
+```
+
+```
+## 'data.frame':	3 obs. of  2 variables:
+##  $ x: int  1 2 3
+##  $ y: chr  "a" "b" "c"
+```
+
+---
+
+## Length Coercion
+
+For data frames if the lengths of the component vectors will be coerced to match, however if they not multiples then there will be an error (previous examples this only produced a warning).
+
+
+```r
+data.frame(x = 1:3, y = c("a"))
+```
+
+```
+##   x y
+## 1 1 a
+## 2 2 a
+## 3 3 a
+```
+
+```r
+data.frame(x = 1:3, y = c("a","b"))
+```
+
+```
+## Error in data.frame(x = 1:3, y = c("a", "b")): arguments imply differing number of rows: 3, 2
+```
+
+```r
+data.frame(x = 1:3, y = character())
+```
+
+```
+## Error in data.frame(x = 1:3, y = character()): arguments imply differing number of rows: 3, 0
+```
+---
+
+## Growing data frames 
+
+We can add rows or columns to a data frame using `rbind` and `cbind` respectively.
+
+
+```r
+df = data.frame(x = 1:3, y = c("a","b","c"))
+cbind(df, z=TRUE)
+```
+
+```
+##   x y    z
+## 1 1 a TRUE
+## 2 2 b TRUE
+## 3 3 c TRUE
+```
+
+.pull-left[
+
+```r
+rbind(df, c(1,"a"))
+```
+
+```
+##   x y
+## 1 1 a
+## 2 2 b
+## 3 3 c
+## 4 1 a
+```
+]
+
+.pull-right[
+
+```r
+str( rbind(df, c(1,"a")) )
+```
+
+```
+## 'data.frame':	4 obs. of  2 variables:
+##  $ x: chr  "1" "2" "3" "1"
+##  $ y: Factor w/ 3 levels "a","b","c": 1 2 3 1
+```
+]
+
+---
+
+.pull-left[
+
+```r
+rbind(df, list(1,"a"))
+```
+
+```
+##   x y
+## 1 1 a
+## 2 2 b
+## 3 3 c
+## 4 1 a
+```
+]
+
+.pull-right[
+
+```r
+str( rbind(df, list(1,"a")) )
+```
+
+```
+## 'data.frame':	4 obs. of  2 variables:
+##  $ x: num  1 2 3 1
+##  $ y: Factor w/ 3 levels "a","b","c": 1 2 3 1
+```
+]
+
+--
+
+
+```r
+df1 = data.frame(x = 1:3, y = c("a","b","c"))
+df2 = data.frame(m = 3:1, n = c(TRUE,TRUE,FALSE))
+```
+
+
+```r
+cbind(df1, df2)
+```
+
+```
+##   x y m     n
+## 1 1 a 3  TRUE
+## 2 2 b 2  TRUE
+## 3 3 c 1 FALSE
+```
+
+```r
+rbind(df1, df2)
+```
+
+```
+## Error in match.names(clabs, names(xi)): names do not match previous names
+```
+
+---
+class: middle
+count: false
+
+# S3 Object System
+
+---
+
+## What is S3?
+
+&lt;br/&gt;
+
+&gt; S3 is R’s first and simplest OO system. It is the only OO system used in the base and stats packages, and it’s the most commonly used system in CRAN packages. S3 is informal and ad hoc, but it has a certain elegance in its minimalism: you can’t take away any part of it and still have a useful OO system.
+
+--Hadley Wickham, Advanced R
+
+.footnote[
+* S3 should not be confused with R's other object oriented systems: S4, Reference classes, and R6*.
+]
+
+---
+
+## `class`
+
+value   |  `typeof`        |  `mode`        |  `class`        
+:-------|:-----------------|:---------------|:---------------
+`NULL`  | NULL | NULL | NULL 
+`TRUE`  | logical | logical | logical 
+`1`     | double    | numeric    | numeric    
+`1L`    | integer   | numeric   | integer   
+`"A"`   | character  | character  | character  
+
+--
+&lt;br/&gt;
+
+.pull-left[
+
+```r
+class( matrix(1,2,2) )
+```
+
+```
+## [1] "matrix"
+```
+
+```r
+class( factor(c("A","B")) )
+```
+
+```
+## [1] "factor"
+```
+]
+
+.pull-right[
+
+```r
+class( data.frame(x=1:3) )
+```
+
+```
+## [1] "data.frame"
+```
+
+```r
+class( (function(x) x^2) )
+```
+
+```
+## [1] "function"
+```
+]
+
+---
+
+## Class specialization
+
+.pull-left[
+
+```r
+x = c("A","B","A","C")
+print( x )
+```
+
+```
+## [1] "A" "B" "A" "C"
+```
+
+```r
+print( factor(x) )
+```
+
+```
+## [1] A B A C
+## Levels: A B C
+```
+
+```r
+print( unclass( factor(x) ) )
+```
+
+```
+## [1] 1 2 1 3
+## attr(,"levels")
+## [1] "A" "B" "C"
+```
+]
+
+--
+
+.pull-right[
+
+```r
+df = data.frame(a=1:3, b=4:6, c=TRUE)
+print( df )
+```
+
+```
+##   a b    c
+## 1 1 4 TRUE
+## 2 2 5 TRUE
+## 3 3 6 TRUE
+```
+
+```r
+print( unclass(df) )
+```
+
+```
+## $a
+## [1] 1 2 3
+## 
+## $b
+## [1] 4 5 6
+## 
+## $c
+## [1] TRUE TRUE TRUE
+## 
+## attr(,"row.names")
+## [1] 1 2 3
+```
+]
+
+--
+
+&lt;br/&gt;
+
+
+```r
+print
+```
+
+```
+## function (x, ...) 
+## UseMethod("print")
+## &lt;bytecode: 0x7f86072848c8&gt;
+## &lt;environment: namespace:base&gt;
+```
+
+---
+
+## Other examples
+
+.pull-left[
+
+```r
+mean
+```
+
+```
+## function (x, ...) 
+## UseMethod("mean")
+## &lt;bytecode: 0x7f8602765790&gt;
+## &lt;environment: namespace:base&gt;
+```
+
+```r
+t.test
+```
+
+```
+## function (x, ...) 
+## UseMethod("t.test")
+## &lt;bytecode: 0x7f86058a3a10&gt;
+## &lt;environment: namespace:stats&gt;
+```
+]
+
+.pull-right[
+
+```r
+summary
+```
+
+```
+## function (object, ...) 
+## UseMethod("summary")
+## &lt;bytecode: 0x7f8607749150&gt;
+## &lt;environment: namespace:base&gt;
+```
+
+```r
+plot
+```
+
+```
+## function (x, y, ...) 
+## UseMethod("plot")
+## &lt;bytecode: 0x7f8603ed5568&gt;
+## &lt;environment: namespace:graphics&gt;
+```
+]
+
+&lt;br/&gt;
+
+Not all base functions are S3,
+
+
+```r
+sum
+```
+
+```
+## function (..., na.rm = FALSE)  .Primitive("sum")
+```
+
+---
+
+## What's going on?
+
+S3 objects and their related functions work using a very simple dispatch mechanism - a generic function is created whose sole job is to call the `UseMethod` function which then calls a class specialized function using the naming convention: `generic.class`.
+
+--
+
+We can see all of the specialized versions of the generic using the `methods` function.
+
+
+```r
+methods("plot")
+```
+
+```
+##  [1] plot,ANY,ANY-method             plot,color,ANY-method          
+##  [3] plot,profile.mle,missing-method plot,stanfit,missing-method    
+##  [5] plot.acf*                       plot.data.frame*               
+##  [7] plot.decomposed.ts*             plot.default                   
+##  [9] plot.dendrogram*                plot.density*                  
+## [11] plot.ecdf                       plot.factor*                   
+## [13] plot.formula*                   plot.function                  
+## [15] plot.ggplot*                    plot.git_repository*           
+## [17] plot.gtable*                    plot.hcl_palettes*             
+## [19] plot.hclust*                    plot.histogram*                
+## [21] plot.HoltWinters*               plot.isoreg*                   
+## [23] plot.lm*                        plot.loo*                      
+## [25] plot.medpolish*                 plot.mlm*                      
+## [27] plot.ppr*                       plot.prcomp*                   
+## [29] plot.princomp*                  plot.profile.nls*              
+## [31] plot.psis*                      plot.psis_loo*                 
+## [33] plot.R6*                        plot.raster*                   
+## [35] plot.sbc*                       plot.spec*                     
+## [37] plot.stepfun                    plot.stl*                      
+## [39] plot.table*                     plot.ts                        
+## [41] plot.tskernel*                  plot.TukeyHSD*                 
+## see '?methods' for accessing help and source code
+```
+
+---
+
+.small[
+
+```r
+methods("print")
+```
+
+```
+##   [1] print,ANY-method                                    
+##   [2] print,CFunc-method                                  
+##   [3] print,CFuncList-method                              
+##   [4] print.acf*                                          
+##   [5] print.AES*                                          
+##   [6] print.all_vars*                                     
+##   [7] print.anova*                                        
+##   [8] print.ansi_string*                                  
+##   [9] print.ansi_style*                                   
+##  [10] print.any_vars*                                     
+##  [11] print.aov*                                          
+##  [12] print.aovlist*                                      
+##  [13] print.ar*                                           
+##  [14] print.Arima*                                        
+##  [15] print.arima0*                                       
+##  [16] print.arrangelist*                                  
+##  [17] print.AsIs                                          
+##  [18] print.aspell*                                       
+##  [19] print.aspell_inspect_context*                       
+##  [20] print.bibentry*                                     
+##  [21] print.Bibtex*                                       
+##  [22] print.BoolResult*                                   
+##  [23] print.boxx*                                         
+##  [24] print.browseVignettes*                              
+##  [25] print.by                                            
+##  [26] print.bytes*                                        
+##  [27] print.callr_error*                                  
+##  [28] print.callr_remote_trace*                           
+##  [29] print.changedFiles*                                 
+##  [30] print.check_code_usage_in_package*                  
+##  [31] print.check_compiled_code*                          
+##  [32] print.check_demo_index*                             
+##  [33] print.check_depdef*                                 
+##  [34] print.check_details*                                
+##  [35] print.check_details_changes*                        
+##  [36] print.check_doi_db*                                 
+##  [37] print.check_dotInternal*                            
+##  [38] print.check_make_vars*                              
+##  [39] print.check_nonAPI_calls*                           
+##  [40] print.check_package_code_assign_to_globalenv*       
+##  [41] print.check_package_code_attach*                    
+##  [42] print.check_package_code_data_into_globalenv*       
+##  [43] print.check_package_code_startup_functions*         
+##  [44] print.check_package_code_syntax*                    
+##  [45] print.check_package_code_unload_functions*          
+##  [46] print.check_package_compact_datasets*               
+##  [47] print.check_package_CRAN_incoming*                  
+##  [48] print.check_package_datasets*                       
+##  [49] print.check_package_depends*                        
+##  [50] print.check_package_description*                    
+##  [51] print.check_package_description_encoding*           
+##  [52] print.check_package_license*                        
+##  [53] print.check_packages_in_dir*                        
+##  [54] print.check_packages_used*                          
+##  [55] print.check_po_files*                               
+##  [56] print.check_pragmas*                                
+##  [57] print.check_Rd_contents*                            
+##  [58] print.check_Rd_line_widths*                         
+##  [59] print.check_Rd_metadata*                            
+##  [60] print.check_Rd_xrefs*                               
+##  [61] print.check_RegSym_calls*                           
+##  [62] print.check_S3_methods_needing_delayed_registration*
+##  [63] print.check_so_symbols*                             
+##  [64] print.check_T_and_F*                                
+##  [65] print.check_url_db*                                 
+##  [66] print.check_vignette_index*                         
+##  [67] print.checkDocFiles*                                
+##  [68] print.checkDocStyle*                                
+##  [69] print.checkFF*                                      
+##  [70] print.checkRd*                                      
+##  [71] print.checkReplaceFuns*                             
+##  [72] print.checkS3methods*                               
+##  [73] print.checkTnF*                                     
+##  [74] print.checkVignettes*                               
+##  [75] print.citation*                                     
+##  [76] print.class_A                                       
+##  [77] print.class_B                                       
+##  [78] print.cli_sitrep*                                   
+##  [79] print.cli_spinner*                                  
+##  [80] print.codoc*                                        
+##  [81] print.codocClasses*                                 
+##  [82] print.codocData*                                    
+##  [83] print.colorConverter*                               
+##  [84] print.compactPDF*                                   
+##  [85] print.compare.loo*                                  
+##  [86] print.condition                                     
+##  [87] print.connection                                    
+##  [88] print.CRAN_package_reverse_dependencies_and_views*  
+##  [89] print.crayon*                                       
+##  [90] print.data.frame                                    
+##  [91] print.Date                                          
+##  [92] print.default                                       
+##  [93] print.dendrogram*                                   
+##  [94] print.density*                                      
+##  [95] print.difftime                                      
+##  [96] print.dist*                                         
+##  [97] print.Dlist                                         
+##  [98] print.DLLInfo                                       
+##  [99] print.DLLInfoList                                   
+## [100] print.DLLRegisteredRoutines                         
+## [101] print.document_context*                             
+## [102] print.document_position*                            
+## [103] print.document_range*                               
+## [104] print.document_selection*                           
+## [105] print.dplyr_sel_vars*                               
+## [106] print.dummy_coef*                                   
+## [107] print.dummy_coef_list*                              
+## [108] print.ecdf*                                         
+## [109] print.eigen                                         
+## [110] print.element*                                      
+## [111] print.factanal*                                     
+## [112] print.factor                                        
+## [113] print.family*                                       
+## [114] print.fileSnapshot*                                 
+## [115] print.findLineNumResult*                            
+## [116] print.flatGridListing*                              
+## [117] print.formula*                                      
+## [118] print.frame*                                        
+## [119] print.fs_bytes*                                     
+## [120] print.fs_path*                                      
+## [121] print.fs_perms*                                     
+## [122] print.fseq*                                         
+## [123] print.ftable*                                       
+## [124] print.fun_list*                                     
+## [125] print.function                                      
+## [126] print.getAnywhere*                                  
+## [127] print.ggplot*                                       
+## [128] print.ggplot2_bins*                                 
+## [129] print.ggproto*                                      
+## [130] print.ggproto_method*                               
+## [131] print.git_blob*                                     
+## [132] print.git_branch*                                   
+## [133] print.git_commit*                                   
+## [134] print.git_config*                                   
+## [135] print.git_diff*                                     
+## [136] print.git_merge_result*                             
+## [137] print.git_note*                                     
+## [138] print.git_reference*                                
+## [139] print.git_reflog*                                   
+## [140] print.git_reflog_entry*                             
+## [141] print.git_repository*                               
+## [142] print.git_signature*                                
+## [143] print.git_stash*                                    
+## [144] print.git_status*                                   
+## [145] print.git_tag*                                      
+## [146] print.git_time*                                     
+## [147] print.git_tree*                                     
+## [148] print.gList*                                        
+## [149] print.glm*                                          
+## [150] print.glue*                                         
+## [151] print.gpar*                                         
+## [152] print.grob*                                         
+## [153] print.gtable*                                       
+## [154] print.hcl_palettes*                                 
+## [155] print.hclust*                                       
+## [156] print.help_files_with_topic*                        
+## [157] print.hexmode                                       
+## [158] print.HoltWinters*                                  
+## [159] print.hsearch*                                      
+## [160] print.hsearch_db*                                   
+## [161] print.htest*                                        
+## [162] print.html*                                         
+## [163] print.html_dependency*                              
+## [164] print.hybrid_call*                                  
+## [165] print.infl*                                         
+## [166] print.integrate*                                    
+## [167] print.isoreg*                                       
+## [168] print.json*                                         
+## [169] print.kmeans*                                       
+## [170] print.knitr_kable*                                  
+## [171] print.Latex*                                        
+## [172] print.LaTeX*                                        
+## [173] print.lazy*                                         
+## [174] print.libraryIQR                                    
+## [175] print.listof                                        
+## [176] print.lm*                                           
+## [177] print.loadings*                                     
+## [178] print.location*                                     
+## [179] print.loess*                                        
+## [180] print.logLik*                                       
+## [181] print.loo*                                          
+## [182] print.ls_str*                                       
+## [183] print.medpolish*                                    
+## [184] print.MethodsFunction*                              
+## [185] print.mtable*                                       
+## [186] print.NativeRoutineList                             
+## [187] print.news_db*                                      
+## [188] print.nls*                                          
+## [189] print.noquote                                       
+## [190] print.numeric_version                               
+## [191] print.object_size*                                  
+## [192] print.octmode                                       
+## [193] print.packageDescription*                           
+## [194] print.packageInfo                                   
+## [195] print.packageIQR*                                   
+## [196] print.packageStatus*                                
+## [197] print.pairwise.htest*                               
+## [198] print.pareto_k_table*                               
+## [199] print.path*                                         
+## [200] print.person*                                       
+## [201] print.pillar*                                       
+## [202] print.pillar_colonnade*                             
+## [203] print.pillar_ornament*                              
+## [204] print.pillar_shaft*                                 
+## [205] print.pillar_squeezed_colonnade*                    
+## [206] print.pillar_vertical*                              
+## [207] print.POSIXct                                       
+## [208] print.POSIXlt                                       
+## [209] print.power.htest*                                  
+## [210] print.ppr*                                          
+## [211] print.prcomp*                                       
+## [212] print.princomp*                                     
+## [213] print.proc_time                                     
+## [214] print.promise*                                      
+## [215] print.ps_handle*                                    
+## [216] print.pseudobma_bb_weights*                         
+## [217] print.pseudobma_weights*                            
+## [218] print.psis*                                         
+## [219] print.psis_loo*                                     
+## [220] print.purrr_function_compose*                       
+## [221] print.purrr_function_partial*                       
+## [222] print.purrr_rate_backoff*                           
+## [223] print.purrr_rate_delay*                             
+## [224] print.quosure*                                      
+## [225] print.quosures*                                     
+## [226] print.R6*                                           
+## [227] print.R6ClassGenerator*                             
+## [228] print.raster*                                       
+## [229] print.Rcpp_stack_trace*                             
+## [230] print.Rd*                                           
+## [231] print.recordedplot*                                 
+## [232] print.rel*                                          
+## [233] print.restart                                       
+## [234] print.RGBcolorConverter*                            
+## [235] print.rlang_box_done*                               
+## [236] print.rlang_box_splice*                             
+## [237] print.rlang_data_pronoun*                           
+## [238] print.rlang_envs*                                   
+## [239] print.rlang_error*                                  
+## [240] print.rlang_fake_data_pronoun*                      
+## [241] print.rlang_lambda_function*                        
+## [242] print.rlang_trace*                                  
+## [243] print.rlang_zap*                                    
+## [244] print.rle                                           
+## [245] print.roman*                                        
+## [246] print.rowwise_df*                                   
+## [247] print.rule*                                         
+## [248] print.sbc*                                          
+## [249] print.scalar*                                       
+## [250] print.sessionInfo*                                  
+## [251] print.shiny.tag*                                    
+## [252] print.shiny.tag.list*                               
+## [253] print.simple.list                                   
+## [254] print.sitrep*                                       
+## [255] print.smooth.spline*                                
+## [256] print.SOCK0node*                                    
+## [257] print.SOCKcluster*                                  
+## [258] print.socket*                                       
+## [259] print.SOCKnode*                                     
+## [260] print.src*                                          
+## [261] print.srcfile                                       
+## [262] print.srcref                                        
+## [263] print.stacking_weights*                             
+## [264] print.stanfit*                                      
+## [265] print.staticPath*                                   
+## [266] print.staticPathOptions*                            
+## [267] print.stepfun*                                      
+## [268] print.stl*                                          
+## [269] print.StructTS*                                     
+## [270] print.subdir_tests*                                 
+## [271] print.summarize_CRAN_check_status*                  
+## [272] print.summary.aov*                                  
+## [273] print.summary.aovlist*                              
+## [274] print.summary.ecdf*                                 
+## [275] print.summary.glm*                                  
+## [276] print.summary.lm*                                   
+## [277] print.summary.loess*                                
+## [278] print.summary.manova*                               
+## [279] print.summary.nls*                                  
+## [280] print.summary.packageStatus*                        
+## [281] print.summary.ppr*                                  
+## [282] print.summary.prcomp*                               
+## [283] print.summary.princomp*                             
+## [284] print.summary.table                                 
+## [285] print.summary.warnings                              
+## [286] print.summaryDefault                                
+## [287] print.table                                         
+## [288] print.tables_aov*                                   
+## [289] print.tbl*                                          
+## [290] print.tbl_cube*                                     
+## [291] print.terms*                                        
+## [292] print.theme*                                        
+## [293] print.trans*                                        
+## [294] print.tree*                                         
+## [295] print.trunc_mat*                                    
+## [296] print.ts*                                           
+## [297] print.tskernel*                                     
+## [298] print.TukeyHSD*                                     
+## [299] print.tukeyline*                                    
+## [300] print.tukeysmooth*                                  
+## [301] print.undoc*                                        
+## [302] print.uneval*                                       
+## [303] print.unit*                                         
+## [304] print.vctrs_sclr*                                   
+## [305] print.vctrs_unspecified*                            
+## [306] print.vctrs_vctr*                                   
+## [307] print.viewport*                                     
+## [308] print.vignette*                                     
+## [309] print.waic*                                         
+## [310] print.warnings                                      
+## [311] print.with_process_cleanup*                         
+## [312] print.xfun_raw_string*                              
+## [313] print.xfun_strict_list*                             
+## [314] print.xgettext*                                     
+## [315] print.xngettext*                                    
+## [316] print.xtabs*                                        
+## see '?methods' for accessing help and source code
+```
+]
+
+---
+
+
+```r
+print.data.frame
+```
+
+```
+## function (x, ..., digits = NULL, quote = FALSE, right = TRUE, 
+##     row.names = TRUE, max = NULL) 
+## {
+##     n &lt;- length(row.names(x))
+##     if (length(x) == 0L) {
+##         cat(sprintf(ngettext(n, "data frame with 0 columns and %d row", 
+##             "data frame with 0 columns and %d rows"), n), "\n", 
+##             sep = "")
+##     }
+##     else if (n == 0L) {
+##         print.default(names(x), quote = FALSE)
+##         cat(gettext("&lt;0 rows&gt; (or 0-length row.names)\n"))
+##     }
+##     else {
+##         if (is.null(max)) 
+##             max &lt;- getOption("max.print", 99999L)
+##         if (!is.finite(max)) 
+##             stop("invalid 'max' / getOption(\"max.print\"): ", 
+##                 max)
+##         omit &lt;- (n0 &lt;- max%/%length(x)) &lt; n
+##         m &lt;- as.matrix(format.data.frame(if (omit) 
+##             x[seq_len(n0), , drop = FALSE]
+##         else x, digits = digits, na.encode = FALSE))
+##         if (!isTRUE(row.names)) 
+##             dimnames(m)[[1L]] &lt;- if (isFALSE(row.names)) 
+##                 rep.int("", if (omit) 
+##                   n0
+##                 else n)
+##             else row.names
+##         print(m, ..., quote = quote, right = right, max = max)
+##         if (omit) 
+##             cat(" [ reached 'max' / getOption(\"max.print\") -- omitted", 
+##                 n - n0, "rows ]\n")
+##     }
+##     invisible(x)
+## }
+## &lt;bytecode: 0x7f8601228538&gt;
+## &lt;environment: namespace:base&gt;
+```
+---
+
+
+```r
+print.integer
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'print.integer' not found
+```
+
+--
+
+
+```r
+print.default
+```
+
+```
+## function (x, digits = NULL, quote = TRUE, na.print = NULL, print.gap = NULL, 
+##     right = FALSE, max = NULL, useSource = TRUE, ...) 
+## {
+##     args &lt;- pairlist(digits = digits, quote = quote, na.print = na.print, 
+##         print.gap = print.gap, right = right, max = max, useSource = useSource, 
+##         ...)
+##     missings &lt;- c(missing(digits), missing(quote), missing(na.print), 
+##         missing(print.gap), missing(right), missing(max), missing(useSource))
+##     .Internal(print.default(x, args, missings))
+## }
+## &lt;bytecode: 0x7f860729f818&gt;
+## &lt;environment: namespace:base&gt;
+```
+
+---
+
+## The other way
+
+If instead we have a class and want to know what specialized functions exist for that class, then we can again use the `methods` function - this time with the `class` argument.
+
+
+```r
+methods(class="data.frame")
+```
+
+```
+##  [1] [             [[            [[&lt;-          [&lt;-           $&lt;-          
+##  [6] aggregate     anyDuplicated as_tibble     as.data.frame as.list      
+## [11] as.matrix     by            cbind         coerce        dim          
+## [16] dimnames      dimnames&lt;-    droplevels    duplicated    edit         
+## [21] filter        format        formula       glimpse       head         
+## [26] initialize    intersect     is_vector_s3  is.na         Math         
+## [31] merge         na.exclude    na.omit       Ops           plot         
+## [36] print         prompt        rbind         row.names     row.names&lt;-  
+## [41] rowsum        setdiff       setequal      show          shuffle      
+## [46] slotsFromS3   split         split&lt;-       stack         str          
+## [51] subset        summary       Summary       t             tail         
+## [56] transform     type.convert  union         unique        unstack      
+## [61] within       
+## see '?methods' for accessing help and source code
+```
+
+---
+class: small
+
+
+```r
+`is.na.data.frame`
+```
+
+```
+## function (x) 
+## {
+##     y &lt;- if (length(x)) {
+##         do.call("cbind", lapply(x, "is.na"))
+##     }
+##     else matrix(FALSE, length(row.names(x)), 0)
+##     if (.row_names_info(x) &gt; 0L) 
+##         rownames(y) &lt;- row.names(x)
+##     y
+## }
+## &lt;bytecode: 0x7f860a676288&gt;
+## &lt;environment: namespace:base&gt;
+```
+
+--
+
+
+```r
+df = data.frame(x = c(1,NA,3), y = c(TRUE, FALSE, NA))
+is.na(df)
+```
+
+```
+##          x     y
+## [1,] FALSE FALSE
+## [2,]  TRUE FALSE
+## [3,] FALSE  TRUE
+```
+
+
+---
+
+## Adding methods
+
+
+
+.pull-left[
+
+```r
+x = structure(c(1,2,3), class="class_A")
+x
+```
+
+```
+## Class A!
+## [1] 1 2 3
+```
+]
+
+.pull-right[
+
+```r
+y = structure(c(1,2,3), class="class_B")
+y
+```
+
+```
+## Class B!
+## [1] 1 2 3
+```
+]
+
+--
+
+&lt;div&gt;
+.pull-left[
+
+```r
+print.class_A = function(x) {
+  cat("Class A!\n")
+  print.default(unclass(x))
+}
+
+x
+```
+
+```
+## Class A!
+## [1] 1 2 3
+```
+]
+
+.pull-right[
+
+```r
+print.class_B = function(x) {
+  cat("Class B!\n")
+  print.default(unclass(x))
+}
+
+y
+```
+
+```
+## Class B!
+## [1] 1 2 3
+```
+]
+&lt;/div&gt;
+
+--
+
+&lt;div&gt;
+.pull-left[
+
+```r
+class(x) = "class_B"
+x
+```
+
+```
+## Class B!
+## [1] 1 2 3
+```
+]
+
+.pull-right[
+
+```r
+class(y) = "class_A"
+y
+```
+
+```
+## Class A!
+## [1] 1 2 3
+```
+]
+&lt;/div&gt;
+
+---
+
+## Defining a new S3 Generic
+
+
+```r
+shuffle = function(x, ...) {
+  UseMethod("shuffle")
+}
+
+shuffle.default = function(x) {
+  stop("Class ", class(x), " is not supported by shuffle.\n", call. = FALSE)
+}
+
+shuffle.data.frame = function(df) {
+  sample(df)
+}
+
+shuffle.integer = function(x) {
+  sample(x)
+}
+```
+
+--
+
+.pull-left[
+
+```r
+shuffle( 1:10 )
+```
+
+```
+##  [1]  1  2  5  3 10  8  9  4  6  7
+```
+
+```r
+shuffle( 
+  data.frame(a=1:4, b=5:8, c=9:12)
+)
+```
+
+```
+##   b  c a
+## 1 5  9 1
+## 2 6 10 2
+## 3 7 11 3
+## 4 8 12 4
+```
+]
+
+.pull-right[
+
+```r
+shuffle( letters[1:5] )
+```
+
+```
+## Error: Class character is not supported by shuffle.
+```
+]
+
+---
+class: middle, center
+
+# Subsetting
+
+---
+
+## Subsetting in General
+
+R has three subsetting operators (`[`, `[[`, and `$`).
+
+The behavior of these operators will depend on the object (class) they are being used with.
+
+&lt;br/&gt;
+
+--
+
+In general there are 6 different types of subseting that can be performed:
+
+* Positive integers
+
+* Negative integers
+
+* Logical values
+
+* Empty / NULL
+
+* Zero
+
+* Character values (names)
+
+The exact behavior of each of these depends on the type / class being subset.
+
+---
+
+## Positive Integer subsetting
+
+Returns elements at the given location(s) (Note - R uses a 1-based indexing scheme).
+
+
+```r
+x = c(1,4,7)
+y = list(1,4,7)
+```
+
+.pull-left[.small[
+
+```r
+x[c(1,3)]
+```
+
+```
+## [1] 1 7
+```
+
+```r
+x[c(1,1)]
+```
+
+```
+## [1] 1 1
+```
+
+```r
+x[c(1.9,2.1)]
+```
+
+```
+## [1] 1 4
+```
+] ]
+
+.pull-right[ .small[
+
+```r
+str( y[c(1,3)] )
 ```
 
 ```
 ## List of 2
-##  $ A: num 1
-##  $ B:List of 2
-##   ..$ C: num 2
-##   ..$ D: num 3
+##  $ : num 1
+##  $ : num 7
 ```
 
 ```r
-list("knock knock" = "who's there?")
+str( y[c(1,1)] )
 ```
 
 ```
-## $`knock knock`
-## [1] "who's there?"
+## List of 2
+##  $ : num 1
+##  $ : num 1
 ```
 
 ```r
-names(list(ABC=1, DEF=list(H=2, I=3)))
+str( y[c(1.9,2.1)] )
 ```
 
 ```
-## [1] "ABC" "DEF"
+## List of 2
+##  $ : num 1
+##  $ : num 4
+```
+] ]
+
+---
+
+## Negative Integer subsetting
+
+Excludes elements at the given location(s)
+
+.pull-left[
+
+```r
+x = c(1,4,7)
+x[-1]
 ```
 
+```
+## [1] 4 7
+```
+
+```r
+x[-c(1,3)]
+```
+
+```
+## [1] 4
+```
+
+```r
+x[c(-1,-1)]
+```
+
+```
+## [1] 4 7
+```
+]
+
+.pull-right[
+
+```r
+y = list(1,4,7)
+str( y[-1] )
+```
+
+```
+## List of 2
+##  $ : num 4
+##  $ : num 7
+```
+
+```r
+str( y[-c(1,3)] )
+```
+
+```
+## List of 1
+##  $ : num 4
+```
+]
+
+
+```r
+x[c(-1,2)]
+```
+
+```
+## Error in x[c(-1, 2)]: only 0's may be mixed with negative subscripts
+```
+
+---
+
+## Logical Value Subsetting
+
+Returns elements that correspond to `TRUE` in the logical vector. Length of the logical vector is expanded to be the same of the vector being subsetted (length coercion).
+
+.pull-left[
+
+```r
+x = c(1,4,7,12)
+x[c(TRUE,TRUE,FALSE,TRUE)]
+```
+
+```
+## [1]  1  4 12
+```
+
+```r
+x[c(TRUE,FALSE)]
+```
+
+```
+## [1] 1 7
+```
+
+```r
+x[x %% 2 == 0]
+```
+
+```
+## [1]  4 12
+```
+]
+
+.pull-right[
+
+```r
+y = list(1,4,7,12)
+str( y[c(TRUE,TRUE,FALSE,TRUE)] )
+```
+
+```
+## List of 3
+##  $ : num 1
+##  $ : num 4
+##  $ : num 12
+```
+
+```r
+str( y[c(TRUE,FALSE)] )
+```
+
+```
+## List of 2
+##  $ : num 1
+##  $ : num 7
+```
+]
+
+--
+
+
+```r
+str( y[y %% 2 == 0] )
+```
+
+```
+## Error in y%%2: non-numeric argument to binary operator
+```
+
+---
+
+## Empty Subsetting
+
+Returns the original vector.
+
+
+```r
+x = c(1,4,7)
+x[]
+```
+
+```
+## [1] 1 4 7
+```
+
+```r
+y = list(1,4,7)
+str(y[])
+```
+
+```
+## List of 3
+##  $ : num 1
+##  $ : num 4
+##  $ : num 7
+```
+
+---
+
+## Zero subsetting
+
+Returns an empty vector (of the same type)
+
+.pull-left[
+
+```r
+x = c(1,4,7)
+x[0]
+```
+
+```
+## numeric(0)
+```
+
+```r
+y = list(1,4,7)
+str(y[0])
+```
+
+```
+##  list()
+```
+]
+
+.pull-right[
+
+```r
+x[c(0,1)]
+```
+
+```
+## [1] 1
+```
+
+```r
+y[c(0,1)]
+```
+
+```
+## [[1]]
+## [1] 1
+```
+]
+
+---
+
+## Character subsetting
+
+If the vector has names, select elements whose names correspond to the values in the character vector.
+
+.pull-left[
+
+```r
+x = c(a=1,b=4,c=7)
+x["a"]
+```
+
+```
+## a 
+## 1
+```
+
+```r
+x[c("a","a")]
+```
+
+```
+## a a 
+## 1 1
+```
+
+```r
+x[c("b","c")]
+```
+
+```
+## b c 
+## 4 7
+```
+]
+
+.pull-right[
+
+```r
+y = list(a=1,b=4,c=7)
+str(y["a"])
+```
+
+```
+## List of 1
+##  $ a: num 1
+```
+
+```r
+str(y[c("a","a")])
+```
+
+```
+## List of 2
+##  $ a: num 1
+##  $ a: num 1
+```
+
+```r
+str(y[c("b","c")])
+```
+
+```
+## List of 2
+##  $ b: num 4
+##  $ c: num 7
+```
+]
+
+---
+
+## Out of bound subsetting
+
+.pull-left[
+
+```r
+x = c(1,4,7)
+x[4]
+```
+
+```
+## [1] NA
+```
+
+```r
+x["a"]
+```
+
+```
+## [1] NA
+```
+
+```r
+x[c(1,4)]
+```
+
+```
+## [1]  1 NA
+```
+]
+
+.pull-right[
+
+```r
+y = list(1,4,7)
+str(y[4])
+```
+
+```
+## List of 1
+##  $ : NULL
+```
+
+```r
+str(y["a"])
+```
+
+```
+## List of 1
+##  $ : NULL
+```
+
+```r
+str(y[c(1,4)])
+```
+
+```
+## List of 2
+##  $ : num 1
+##  $ : NULL
+```
+]
+
+---
+
+## Missing and NULL subsetting
+
+.pull-left[
+
+```r
+x = c(1,4,7)
+x[NA]
+```
+
+```
+## [1] NA NA NA
+```
+
+```r
+x[NULL]
+```
+
+```
+## numeric(0)
+```
+
+```r
+x[c(1,NA)]
+```
+
+```
+## [1]  1 NA
+```
+]
+
+.pull-right[
+
+```r
+y = list(1,4,7)
+str(y[NA])
+```
+
+```
+## List of 3
+##  $ : NULL
+##  $ : NULL
+##  $ : NULL
+```
+
+```r
+str(y[NULL])
+```
+
+```
+##  list()
+```
+
+```r
+str(y[c(1,NA)])
+```
+
+```
+## List of 2
+##  $ : num 1
+##  $ : NULL
+```
+]
+
+---
+
+## Atomic vectors - [ vs. [[
+
+`[[` subsets like `[` except it can only subset a single value. 
+
+
+```r
+x = c(a=1,b=4,c=7)
+x[[1]]
+```
+
+```
+## [1] 1
+```
+
+```r
+x[["a"]]
+```
+
+```
+## [1] 1
+```
+
+```r
+x[[1:2]]
+```
+
+```
+## Error in x[[1:2]]: attempt to select more than one element in vectorIndex
+```
+
+---
+
+## Generic Vectors - [ vs. [[
+
+Subsets a single value, but returns the value - not a list containing that value.
+
+
+```r
+y = list(a=1,b=4,c=7)
+y[2]
+```
+
+```
+## $b
+## [1] 4
+```
+
+```r
+y[[2]]
+```
+
+```
+## [1] 4
+```
+
+```r
+y[["b"]]
+```
+
+```
+## [1] 4
+```
+
+```r
+y[[1:2]]
+```
+
+```
+## Error in y[[1:2]]: subscript out of bounds
+```
+
+---
+
+## Hadley's Analogy
+
+&lt;img src="imgs/pepper_subset.png" width="2617" style="display: block; margin: auto;" /&gt;
+
+---
+
+## [[ vs. $
+
+`$` is equivalent to `[[` but it only works for named *lists* and it has a terrible default where it uses partial matching (`exact=FALSE`) to access the underlying value.
+
+
+```r
+x = c("abc"=1, "def"=5)
+x$abc
+```
+
+```
+## Error in x$abc: $ operator is invalid for atomic vectors
+```
+
+```r
+y = list("abc"=1, "def"=5)
+y[["abc"]]
+```
+
+```
+## [1] 1
+```
+
+```r
+y$abc
+```
+
+```
+## [1] 1
+```
+
+```r
+y$d
+```
+
+```
+## [1] 5
+```
+---
+
+## A common gotcha
+
+Why does the following code not work?
+
+
+```r
+x = list(abc = 1:10, def = 10:1)
+y = "abc"
+
+x$y
+```
+
+```
+## NULL
+```
+
+--
+
+$$ x$y \Leftrightarrow x[["y"]] \ne x[[y]] $$
+
+
+```r
+x[[y]]
+```
+
+```
+##  [1]  1  2  3  4  5  6  7  8  9 10
+```
+
+---
+
+## Exercise 1
+
+Below are 100 values,
+
+
+```r
+x = c(56, 3, 17, 2, 4, 9, 6, 5, 19, 5, 2, 3, 5, 0, 13, 12, 6, 31, 10, 21, 8, 4, 1, 1, 2, 5, 16, 1, 3, 8, 1,
+      3, 4, 8, 5, 2, 8, 6, 18, 40, 10, 20, 1, 27, 2, 11, 14, 5, 7, 0, 3, 0, 7, 0, 8, 10, 10, 12, 8, 82,
+      21, 3, 34, 55, 18, 2, 9, 29, 1, 4, 7, 14, 7, 1, 2, 7, 4, 74, 5, 0, 3, 13, 2, 8, 1, 6, 13, 7, 1, 10,
+      5, 2, 4, 4, 14, 15, 4, 17, 1, 9)
+```
+
+write down how you would create a subset to accomplish each of the following:
+
+* Select every third value starting at position 2 in `x`.
+
+* Remove all values with an odd index (e.g. 1, 3, etc.)
+
+* Remove every 4th value, but only if it is odd.
+
+---
+class: middle
+count: false
+
+# Subsetting Data Frames
+
+---
+
+## Basic subsetting
+
+
+```r
+df = data.frame(x = 1:3, y=c("A","B","C"))
+```
+
+.pull-left[
+
+```r
+df[1, ]
+```
+
+```
+##   x y
+## 1 1 A
+```
+
+```r
+df[, 1]
+```
+
+```
+## [1] 1 2 3
+```
+
+```r
+df[1]
+```
+
+```
+##   x
+## 1 1
+## 2 2
+## 3 3
+```
+
+```r
+df[[1]]
+```
+
+```
+## [1] 1 2 3
+```
+
+```r
+df$x
+```
+
+```
+## [1] 1 2 3
+```
+]
+
+.pull-right[
+
+```r
+str( df[1, ] )
+```
+
+```
+## 'data.frame':	1 obs. of  2 variables:
+##  $ x: int 1
+##  $ y: Factor w/ 3 levels "A","B","C": 1
+```
+
+```r
+str( df[, 1] )
+```
+
+```
+##  int [1:3] 1 2 3
+```
+
+```r
+str( df[1] )
+```
+
+```
+## 'data.frame':	3 obs. of  1 variable:
+##  $ x: int  1 2 3
+```
+
+```r
+str( df[[1]] )
+```
+
+```
+##  int [1:3] 1 2 3
+```
+
+```r
+str( df$x )
+```
+
+```
+##  int [1:3] 1 2 3
+```
+]
+
+---
+
+## Preserving vs Simplifying
+
+Most of the time, R's `[` subset operator is a *preserving* operator, in that the returned object will have the same type/class as the parent. Confusingly, when used with some classes (e.g. data frame, matrix or array) `[` becomes a *simplifying* operator (does not preserve type) - this behavior is controlled by the `drop` argument.
+
+
+```r
+x = data.frame(x = 1:3, y=c("A","B","C"))
+```
+
+.pull-left[
+
+```r
+x[1, ]
+```
+
+```
+##   x y
+## 1 1 A
+```
+
+```r
+x[1, , drop=TRUE]
+```
+
+```
+## $x
+## [1] 1
+## 
+## $y
+## [1] A
+## Levels: A B C
+```
+
+```r
+x[1, , drop=FALSE]
+```
+
+```
+##   x y
+## 1 1 A
+```
+]
+
+.pull-right[
+
+```r
+str(x[1, ])
+```
+
+```
+## 'data.frame':	1 obs. of  2 variables:
+##  $ x: int 1
+##  $ y: Factor w/ 3 levels "A","B","C": 1
+```
+
+```r
+str(x[1, , drop=TRUE])
+```
+
+```
+## List of 2
+##  $ x: int 1
+##  $ y: Factor w/ 3 levels "A","B","C": 1
+```
+
+```r
+str(x[1, , drop=FALSE])
+```
+
+```
+## 'data.frame':	1 obs. of  2 variables:
+##  $ x: int 1
+##  $ y: Factor w/ 3 levels "A","B","C": 1
+```
+]
+
+
+---
+
+## Aside - Factor Subsetting
+
+
+```r
+(x = factor(c("Sunny", "Cloudy", "Rainy", "Cloudy")))
+```
+
+```
+## [1] Sunny  Cloudy Rainy  Cloudy
+## Levels: Cloudy Rainy Sunny
+```
+
+```r
+x[1:2]
+```
+
+```
+## [1] Sunny  Cloudy
+## Levels: Cloudy Rainy Sunny
+```
+
+```r
+x[1:3]
+```
+
+```
+## [1] Sunny  Cloudy Rainy 
+## Levels: Cloudy Rainy Sunny
+```
+
+```r
+x[1:2, drop=TRUE]
+```
+
+```
+## [1] Sunny  Cloudy
+## Levels: Cloudy Sunny
+```
+
+```r
+x[1:3, drop=TRUE]
+```
+
+```
+## [1] Sunny  Cloudy Rainy 
+## Levels: Cloudy Rainy Sunny
+```
+
+---
+
+## Preserving vs Simplifying Subsets
+
+&lt;br/&gt;
+
+Type             |  Simplifying             |  Preserving
+:----------------|:-------------------------|:-----------------------------------------------------
+Atomic Vector    |                          |  `x[[1]]` &lt;br/&gt; `x[1]`
+List             |  `x[[1]]`                |  `x[1]`
+Matrix / Array   |  `x[[1]]` &lt;br/&gt; `x[1, ]` &lt;br/&gt; `x[, 1]` |  `x[1, , drop=FALSE]` &lt;br/&gt; `x[, 1, drop=FALSE]`
+Factor           |  `x[1:4, drop=TRUE]`     |  `x[1:4]` &lt;br/&gt; `x[[1]]`
+Data frame       |  `x[, 1]` &lt;br/&gt; `x[[1]]` |  `x[, 1, drop=FALSE]` &lt;br/&gt; `x[1]`
+
+---
+class: middle
+count: false
+
+# Subsetting and assignment
+
+---
+
+## Subsetting and assignment
+
+Subsets can also be used with assignment to update specific values within an object.
+
+
+```r
+x = c(1, 4, 7)
+```
+
+
+```r
+x[2] = 2
+x
+```
+
+```
+## [1] 1 2 7
+```
+
+```r
+x[x %% 2 != 0] = x[x %% 2 != 0] + 1
+x
+```
+
+```
+## [1] 2 2 8
+```
+
+```r
+x[c(1,1)] = c(2,3)
+x
+```
+
+```
+## [1] 3 2 8
+```
+
+---
+
+.pull-left[
+
+```r
+x = 1:6
+x[c(2,NA)] = 1
+x
+```
+
+```
+## [1] 1 1 3 4 5 6
+```
+
+
+```r
+x = 1:6
+x[c(TRUE,NA)] = 1
+x
+```
+
+```
+## [1] 1 2 1 4 1 6
+```
+]
+
+.pull-right[
+
+```r
+x = 1:6
+x[c(-1,-3)] = 3
+x
+```
+
+```
+## [1] 1 3 3 3 3 3
+```
+
+
+```r
+x = 1:6
+x[] = 6:1
+x
+```
+
+```
+## [1] 6 5 4 3 2 1
+```
+]
+
+---
+
+## Subsets of Subsets
+
+
+```r
+df = data.frame(a = c(5,1,NA,3))
+```
+
+
+```r
+df$a[df$a == 5] = 0
+df
+```
+
+```
+##    a
+## 1  0
+## 2  1
+## 3 NA
+## 4  3
+```
+
+
+
+```r
+df[1][df[1] == 3] = 0
+df
+```
+
+```
+##    a
+## 1  0
+## 2  1
+## 3 NA
+## 4  0
+```
 
 ---
 
 ## Exercise 2
 
-Represent the following JSON data as a list in R.
+Some data providers choose to encode missing values using values like `-999`. Below is a sample data frame with missing values encoded in this way. 
 
-```json
-{
-  "firstName": "John",
-  "lastName": "Smith",
-  "age": 25,
-  "address": 
-  {
-    "streetAddress": "21 2nd Street",
-    "city": "New York",
-    "state": "NY",
-    "postalCode": 10021
-  },
-  "phoneNumber": 
-  [
-    {
-      "type": "home",
-      "number": "212 555-1239"
-    },
-    {
-      "type": "fax",
-      "number": "646 555-4567"
-    }
-  ]
-}
+
+```r
+d = data.frame(
+  patient_id = c(1, 2, 3, 4, 5),
+  age = c(32, 27, 56, 19, 65),
+  bp = c(110, 100, 125, -999, -999),
+  o2 = c(97, 95, -999, -999, 99)
+)
 ```
+
+* *Task 1* - using the subsetting tools we've discussed come up with code that will replace the `-999` values in the `bp` and `o2` column with actual `NA` values. Save this as `d_na`.
+
+* *Task 2* - Once you have created `d_na` come up with code that translate it back into the original data frame `d`, i.e. replace the `NA`s with `-999`.
 
 ---
 
-# Acknowledgments
 ## Acknowledgments
 
 Above materials are derived in part from the following sources:
@@ -269,7 +2848,24 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     }
     deleted = true;
   });
-})();</script>
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
 
 <script>
 (function() {

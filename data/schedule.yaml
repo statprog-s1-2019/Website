@@ -18,6 +18,7 @@ schedule:
 - week: 2
   day: 0
   lecture: "Data Structures & S3 <br/> Base Subsetting"
+  slides: Lec02
   readings:
   - text: Adv R - OO Field Guide - S3
     link: http://adv-r.had.co.nz/OO-essentials.html#s3

@@ -1,5 +1,5 @@
 ---
-title: "Data types in R"
+title: "Attributes, Classes, S3, and Subsetting"
 author: "Colin Rundel"
 date: "2019-01-17"
 output:
@@ -19,6 +19,9 @@ options(
   width=80
 )
 htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+
+fansi::set_knit_hooks(knitr::knit_hooks)
+
 ```
 
 
@@ -27,40 +30,73 @@ htmltools::tagList(rmarkdown::html_dependency_font_awesome())
 class: middle
 count: false
 
-# Generic Vectors
-
+# Generic Vectors (Briefly)
 
 ---
 
 ## Lists
 
-Lists are _generic vectors_, in that they are 1 dimensional (i.e. have a length) and can contain any type of R object.
+Lists are _generic vectors_, as such they are 1 dimensional (i.e. have a length) and can contain any type of R object.
 
 ```{r}
-list("A", c(TRUE,FALSE), (1:4)/2, function(x) x^2)
+list("A", c(TRUE,FALSE), (1:4)/2, list(1:2), function(x) x^2)
 ```
 
 
 ---
 
-## Structure
+## `str`ucture
 
 Often we want a more compact representation of a complex object, the `str` function is useful for this particular task
 
 ```{r}
-str( list("A", c(TRUE,FALSE), (1:4)/2, function(x) x^2) )
+str(1:4)
+```
+
+```{r}
+str( list("A", c(TRUE,FALSE), (1:4)/2, list(1:2), function(x) x^2) )
 ```
 
 
 ---
 
-## Recursive lists
+## Lists as "trees"
 
 Lists can contain other lists, meaning they don't have to be flat
 
 ```{r}
-str( list(1, list(2, list(3, 4), 5)) )
+str( list(a=1, b=list(c=2, d=list(f=3, g=4), e=5)) )
 ```
+
+--
+
+.pull-left[
+```{r}
+json = '{
+  "firstName": "John",
+  "lastName": "Smith",
+  "isAlive": true,
+  "age": 27,
+  "phoneNumbers": [
+    {
+      "type": "home",
+      "number": "212 555-1234"
+    },{
+      "type": "mobile",
+      "number": "123 456-7890"
+    }
+  ]
+}'
+```
+]
+
+--
+
+.pull-right[
+```{r}
+str( jsonlite::fromJSON(json, simplifyVector = FALSE) )
+```
+]
 
 
 ---
@@ -75,62 +111,1056 @@ str( c(1, list(4, list(6, 7))) )
 
 --
 
+<br/>
+
 We can coerce a list into an atomic vector using `unlist` - the usual type coercion rules then apply to determine its type.
 
 ```{r}
+unlist(list(1:3, 4:5, 6))
 unlist(list(1:3, list(4:5, 6)))
 unlist( list(1, list(2, list(3, "Hello"))) )
+```
+
+---
+class: middle
+count: false
+
+# Attributes
+
+---
+
+## Attributes
+
+Attributes are metadata that can be attached to objects in R. Some are special (e.g. `class`, `comment`, `dim`, `dimnames`, `names`, etc.) and change the way in which an object is treated by R. 
+
+Attributes are implemented as a named list that are accessed (get and set) individually via the `attr` function and collectively via the `attributes` function.
+
+```{r}
+(x = c(L=1,M=2,N=3))
+```
+
+--
+
+```{r}
+str(x)
+```
+
+--
+
+```{r}
+attributes(x)
+str(attributes(x))
+```
+
+---
+
+```{r}
+attr(x,"names") = c("A","B","C")
+x
+```
+
+--
+
+```{r}
+names(x)
+names(x) = c("Z","Y","X")
+x
+```
+
+--
+
+.pull-left[
+```{r}
+names(x) = 1:3
+x
+attributes(x)
+```
+]
+
+.pull-right[
+```{r}
+names(x) = c(TRUE, FALSE, TRUE)
+x
+attributes(x)
+```
+]
+
+
+---
+
+## Factors
+
+Factor objects are how R represents categorical data (e.g. a variable where there are a fixed # of possible outcomes).
+
+```{r}
+(x = factor(c("Sunny", "Cloudy", "Rainy", "Cloudy", "Cloudy")))
+```
+
+--
+
+```{r}
+str(x)
+```
+
+--
+
+```{r}
+typeof(x)
+```
+
+---
+
+## Composition
+
+A factor is just an integer vector with two attributes: `class = "factor"` and `levels` a character vector with the possible levels.
+
+```{r}
+x
+attributes(x)
+```
+
+--
+
+<br/>
+
+We can build our own factor from scratch using,
+
+```{r}
+y = c(3L, 1L, 2L, 1L, 1L)
+attr(y, "levels") = c("Cloudy", "Rainy", "Sunny")
+attr(y, "class") = "factor"
+y
+```
+
+---
+
+## 
+
+Knowning factors are stored as integers help explain some of their more interesting behaviors:
+
+```{r error=TRUE}
+x+1
+is.integer(x)
+as.integer(x)
+as.character(x)
+as.logical(x)
+```
+
+ 
+
+---
+class: middle
+count: false
+
+# Data Frames
+
+---
+
+## Data Frames
+
+A data frame is how R handles heterogeneous tabular data (i.e. rows and columns) and is one of the most commonly used data structure in R.
+
+```{r}
+(df = data.frame(
+  x = 1:3, 
+  y = c("a", "b", "c"),
+  z = c(TRUE)
+))
+```
+
+--
+
+R represents data frames using a list of equal length vectors (usually atomic, but you can use lists as well).
+
+```{r}
+str(df)
+```
+
+---
+
+```{r}
+typeof(df)
+class(df)
+attributes(df)
+```
+
+---
+
+## Roll your own data.frame
+
+```{r}
+df2 = list(x = 1:3, y = factor(c("a", "b", "c")), z = c(TRUE, TRUE, TRUE))
+```
+
+--
+
+.pull-left[
+```{r}
+attr(df2,"class") = "data.frame"
+df2
+```
+]
+
+--
+
+.pull-right[
+```{r}
+attr(df2,"row.names") = 1:3
+df2
+```
+]
+
+```{r}
+str(df2)
+identical(df, df2)
+```
+
+---
+
+## Strings (Characters) vs Factors
+
+By default character vectors will be convert into factors when they are included in a data frame. 
+
+Sometimes this is useful, usually it isn't -- either way it is important to know what type/class you are working with. This behavior can be changed using the `stringsAsFactors` argument to data.frame and related functions.
+
+```{r}
+df = data.frame(x = 1:3, y = c("a", "b", "c"), stringsAsFactors = FALSE)
+df
+str(df)
+```
+
+---
+
+## Length Coercion
+
+For data frames if the lengths of the component vectors will be coerced to match, however if they not multiples then there will be an error (previous examples this only produced a warning).
+
+```{r error=TRUE}
+data.frame(x = 1:3, y = c("a"))
+data.frame(x = 1:3, y = c("a","b"))
+data.frame(x = 1:3, y = character())
+```
+---
+
+## Growing data frames 
+
+We can add rows or columns to a data frame using `rbind` and `cbind` respectively.
+
+```{r}
+df = data.frame(x = 1:3, y = c("a","b","c"))
+cbind(df, z=TRUE)
+```
+
+.pull-left[
+```{r}
+rbind(df, c(1,"a"))
+```
+]
+
+.pull-right[
+```{r}
+str( rbind(df, c(1,"a")) )
+```
+]
+
+---
+
+.pull-left[
+```{r}
+rbind(df, list(1,"a"))
+```
+]
+
+.pull-right[
+```{r}
+str( rbind(df, list(1,"a")) )
+```
+]
+
+--
+
+```{r}
+df1 = data.frame(x = 1:3, y = c("a","b","c"))
+df2 = data.frame(m = 3:1, n = c(TRUE,TRUE,FALSE))
+```
+
+```{r error=TRUE}
+cbind(df1, df2)
+rbind(df1, df2)
+```
+
+---
+class: middle
+count: false
+
+# S3 Object System
+
+---
+
+## What is S3?
+
+<br/>
+
+> S3 is R’s first and simplest OO system. It is the only OO system used in the base and stats packages, and it’s the most commonly used system in CRAN packages. S3 is informal and ad hoc, but it has a certain elegance in its minimalism: you can’t take away any part of it and still have a useful OO system.
+
+--Hadley Wickham, Advanced R
+
+.footnote[
+* S3 should not be confused with R's other object oriented systems: S4, Reference classes, and R6*.
+]
+
+---
+
+## `class`
+
+value   |  `typeof`        |  `mode`        |  `class`        
+:-------|:-----------------|:---------------|:---------------
+`NULL`  | `r typeof(NULL)` | `r mode(NULL)` | `r class(NULL)` 
+`TRUE`  | `r typeof(TRUE)` | `r mode(TRUE)` | `r class(TRUE)` 
+`1`     | `r typeof(1)`    | `r mode(1)`    | `r class(1)`    
+`1L`    | `r typeof(1L)`   | `r mode(1L)`   | `r class(1L)`   
+`"A"`   | `r typeof("A")`  | `r mode("A")`  | `r class("A")`  
+
+--
+<br/>
+
+.pull-left[
+```{r}
+class( matrix(1,2,2) )
+class( factor(c("A","B")) )
+```
+]
+
+.pull-right[
+```{r}
+class( data.frame(x=1:3) )
+class( (function(x) x^2) )
+```
+]
+
+---
+
+## Class specialization
+
+.pull-left[
+```{r}
+x = c("A","B","A","C")
+print( x )
+print( factor(x) )
+print( unclass( factor(x) ) )
+```
+]
+
+--
+
+.pull-right[
+```{r}
+df = data.frame(a=1:3, b=4:6, c=TRUE)
+print( df )
+print( unclass(df) )
+```
+]
+
+--
+
+<br/>
+
+```{r}
+print
+```
+
+---
+
+## Other examples
+
+.pull-left[
+```{r}
+mean
+t.test
+```
+]
+
+.pull-right[
+```{r}
+summary
+plot
+```
+]
+
+<br/>
+
+Not all base functions are S3,
+
+```{r}
+sum
+```
+
+---
+
+## What's going on?
+
+S3 objects and their related functions work using a very simple dispatch mechanism - a generic function is created whose sole job is to call the `UseMethod` function which then calls a class specialized function using the naming convention: `generic.class`.
+
+--
+
+We can see all of the specialized versions of the generic using the `methods` function.
+
+```{r}
+methods("plot")
+```
+
+---
+
+.small[
+```{r}
+methods("print")
+```
+]
+
+---
+
+```{r}
+print.data.frame
+```
+---
+
+```{r error=TRUE}
+print.integer
+```
+
+--
+
+```{r}
+print.default
+```
+
+---
+
+## The other way
+
+If instead we have a class and want to know what specialized functions exist for that class, then we can again use the `methods` function - this time with the `class` argument.
+
+```{r}
+methods(class="data.frame")
+```
+
+---
+class: small
+
+```{r}
+`is.na.data.frame`
+```
+
+--
+
+```{r}
+df = data.frame(x = c(1,NA,3), y = c(TRUE, FALSE, NA))
+is.na(df)
 ```
 
 
 ---
 
-## Named lists
+## Adding methods
 
-Because of their more complex structure we often want to name the elements of a list (we can also do this with vectors). This can make reading and accessing the list more straight forward.
-
-```{r}
-str(list(A = 1, B = list(C = 2, D = 3)))
-list("knock knock" = "who's there?")
-names(list(ABC=1, DEF=list(H=2, I=3)))
+```{r include=FALSE}
+rm(print.x)
+rm(print.y)
 ```
 
+.pull-left[
+```{r}
+x = structure(c(1,2,3), class="class_A")
+x
+```
+]
+
+.pull-right[
+```{r}
+y = structure(c(1,2,3), class="class_B")
+y
+```
+]
+
+--
+
+<div>
+.pull-left[
+```{r}
+print.class_A = function(x) {
+  cat("Class A!\n")
+  print.default(unclass(x))
+}
+
+x
+```
+]
+
+.pull-right[
+```{r}
+print.class_B = function(x) {
+  cat("Class B!\n")
+  print.default(unclass(x))
+}
+
+y
+```
+]
+</div>
+
+--
+
+<div>
+.pull-left[
+```{r}
+class(x) = "class_B"
+x
+```
+]
+
+.pull-right[
+```{r}
+class(y) = "class_A"
+y
+```
+]
+</div>
+
+---
+
+## Defining a new S3 Generic
+
+```{r}
+shuffle = function(x, ...) {
+  UseMethod("shuffle")
+}
+
+shuffle.default = function(x) {
+  stop("Class ", class(x), " is not supported by shuffle.\n", call. = FALSE)
+}
+
+shuffle.data.frame = function(df) {
+  sample(df)
+}
+
+shuffle.integer = function(x) {
+  sample(x)
+}
+
+```
+
+--
+
+.pull-left[
+```{r error=TRUE}
+shuffle( 1:10 )
+shuffle( 
+  data.frame(a=1:4, b=5:8, c=9:12)
+)
+```
+]
+
+.pull-right[
+```{r error=TRUE}
+shuffle( letters[1:5] )
+```
+]
+
+---
+class: middle, center
+
+# Subsetting
+
+---
+
+## Subsetting in General
+
+R has three subsetting operators (`[`, `[[`, and `$`).
+
+The behavior of these operators will depend on the object (class) they are being used with.
+
+<br/>
+
+--
+
+In general there are 6 different types of subseting that can be performed:
+
+* Positive integers
+
+* Negative integers
+
+* Logical values
+
+* Empty / NULL
+
+* Zero
+
+* Character values (names)
+
+The exact behavior of each of these depends on the type / class being subset.
+
+---
+
+## Positive Integer subsetting
+
+Returns elements at the given location(s) (Note - R uses a 1-based indexing scheme).
+
+```{r}
+x = c(1,4,7)
+y = list(1,4,7)
+```
+
+.pull-left[.small[
+```{r}
+x[c(1,3)]
+x[c(1,1)]
+x[c(1.9,2.1)]
+```
+] ]
+
+.pull-right[ .small[
+```{r}
+str( y[c(1,3)] )
+str( y[c(1,1)] )
+str( y[c(1.9,2.1)] )
+```
+] ]
+
+---
+
+## Negative Integer subsetting
+
+Excludes elements at the given location(s)
+
+.pull-left[
+```{r, error=TRUE}
+x = c(1,4,7)
+x[-1]
+x[-c(1,3)]
+x[c(-1,-1)]
+```
+]
+
+.pull-right[
+```{r, error=TRUE}
+y = list(1,4,7)
+str( y[-1] )
+str( y[-c(1,3)] )
+```
+]
+
+```{r error=TRUE}
+x[c(-1,2)]
+```
+
+---
+
+## Logical Value Subsetting
+
+Returns elements that correspond to `TRUE` in the logical vector. Length of the logical vector is expanded to be the same of the vector being subsetted (length coercion).
+
+.pull-left[
+```{r}
+x = c(1,4,7,12)
+x[c(TRUE,TRUE,FALSE,TRUE)]
+x[c(TRUE,FALSE)]
+x[x %% 2 == 0]
+```
+]
+
+.pull-right[
+```{r, error=TRUE}
+y = list(1,4,7,12)
+str( y[c(TRUE,TRUE,FALSE,TRUE)] )
+str( y[c(TRUE,FALSE)] )
+```
+]
+
+--
+
+```{r error=TRUE}
+str( y[y %% 2 == 0] )
+```
+
+---
+
+## Empty Subsetting
+
+Returns the original vector.
+
+```{r}
+x = c(1,4,7)
+x[]
+
+y = list(1,4,7)
+str(y[])
+```
+
+---
+
+## Zero subsetting
+
+Returns an empty vector (of the same type)
+
+.pull-left[
+```{r}
+x = c(1,4,7)
+x[0]
+
+y = list(1,4,7)
+str(y[0])
+```
+]
+
+.pull-right[
+```{r}
+x[c(0,1)]
+
+y[c(0,1)]
+```
+]
+
+---
+
+## Character subsetting
+
+If the vector has names, select elements whose names correspond to the values in the character vector.
+
+.pull-left[
+```{r}
+x = c(a=1,b=4,c=7)
+x["a"]
+x[c("a","a")]
+x[c("b","c")]
+```
+]
+
+.pull-right[
+```{r}
+y = list(a=1,b=4,c=7)
+str(y["a"])
+str(y[c("a","a")])
+str(y[c("b","c")])
+```
+]
+
+---
+
+## Out of bound subsetting
+
+.pull-left[
+```{r}
+x = c(1,4,7)
+x[4]
+x["a"]
+x[c(1,4)]
+```
+]
+
+.pull-right[
+```{r}
+y = list(1,4,7)
+str(y[4])
+str(y["a"])
+str(y[c(1,4)])
+```
+]
+
+---
+
+## Missing and NULL subsetting
+
+.pull-left[
+```{r}
+x = c(1,4,7)
+x[NA]
+x[NULL]
+x[c(1,NA)]
+```
+]
+
+.pull-right[
+```{r}
+y = list(1,4,7)
+str(y[NA])
+str(y[NULL])
+str(y[c(1,NA)])
+```
+]
+
+---
+
+## Atomic vectors - [ vs. [[
+
+`[[` subsets like `[` except it can only subset a single value. 
+
+```{r, error=TRUE}
+x = c(a=1,b=4,c=7)
+x[[1]]
+x[["a"]]
+x[[1:2]]
+```
+
+---
+
+## Generic Vectors - [ vs. [[
+
+Subsets a single value, but returns the value - not a list containing that value.
+
+```{r, error=TRUE}
+y = list(a=1,b=4,c=7)
+y[2]
+y[[2]]
+y[["b"]]
+y[[1:2]]
+```
+
+---
+
+## Hadley's Analogy
+
+```{r echo=FALSE, fig.align="center", outwidth="80%"}
+knitr::include_graphics("imgs/pepper_subset.png")
+```
+
+---
+
+## [[ vs. $
+
+`$` is equivalent to `[[` but it only works for named *lists* and it has a terrible default where it uses partial matching (`exact=FALSE`) to access the underlying value.
+
+```{r, error=TRUE}
+x = c("abc"=1, "def"=5)
+x$abc
+y = list("abc"=1, "def"=5)
+y[["abc"]]
+y$abc
+y$d
+```
+---
+
+## A common gotcha
+
+Why does the following code not work?
+
+```{r error=TRUE}
+x = list(abc = 1:10, def = 10:1)
+y = "abc"
+
+x$y
+```
+
+--
+
+$$ x$y \Leftrightarrow x[["y"]] \ne x[[y]] $$
+
+```{r}
+x[[y]]
+```
+
+---
+
+## Exercise 1
+
+Below are 100 values,
+
+```{r}
+x = c(56, 3, 17, 2, 4, 9, 6, 5, 19, 5, 2, 3, 5, 0, 13, 12, 6, 31, 10, 21, 8, 4, 1, 1, 2, 5, 16, 1, 3, 8, 1,
+      3, 4, 8, 5, 2, 8, 6, 18, 40, 10, 20, 1, 27, 2, 11, 14, 5, 7, 0, 3, 0, 7, 0, 8, 10, 10, 12, 8, 82,
+      21, 3, 34, 55, 18, 2, 9, 29, 1, 4, 7, 14, 7, 1, 2, 7, 4, 74, 5, 0, 3, 13, 2, 8, 1, 6, 13, 7, 1, 10,
+      5, 2, 4, 4, 14, 15, 4, 17, 1, 9)
+```
+
+write down how you would create a subset to accomplish each of the following:
+
+* Select every third value starting at position 2 in `x`.
+
+* Remove all values with an odd index (e.g. 1, 3, etc.)
+
+* Remove every 4th value, but only if it is odd.
+
+---
+class: middle
+count: false
+
+# Subsetting Data Frames
+
+---
+
+## Basic subsetting
+
+```{r}
+df = data.frame(x = 1:3, y=c("A","B","C"))
+```
+
+.pull-left[
+```{r error=TRUE}
+df[1, ]
+df[, 1]
+df[1]
+df[[1]]
+df$x
+```
+]
+
+.pull-right[
+```{r error=TRUE}
+str( df[1, ] )
+str( df[, 1] )
+str( df[1] )
+str( df[[1]] )
+str( df$x )
+```
+]
+
+---
+
+## Preserving vs Simplifying
+
+Most of the time, R's `[` subset operator is a *preserving* operator, in that the returned object will have the same type/class as the parent. Confusingly, when used with some classes (e.g. data frame, matrix or array) `[` becomes a *simplifying* operator (does not preserve type) - this behavior is controlled by the `drop` argument.
+
+```{r}
+x = data.frame(x = 1:3, y=c("A","B","C"))
+```
+
+.pull-left[
+```{r error=TRUE}
+x[1, ]
+x[1, , drop=TRUE]
+x[1, , drop=FALSE]
+```
+]
+
+.pull-right[
+```{r error=TRUE}
+str(x[1, ])
+str(x[1, , drop=TRUE])
+str(x[1, , drop=FALSE])
+```
+]
+
+
+---
+
+## Aside - Factor Subsetting
+
+```{r}
+(x = factor(c("Sunny", "Cloudy", "Rainy", "Cloudy")))
+x[1:2]
+x[1:3]
+x[1:2, drop=TRUE]
+x[1:3, drop=TRUE]
+```
+
+---
+
+## Preserving vs Simplifying Subsets
+
+<br/>
+
+Type             |  Simplifying             |  Preserving
+:----------------|:-------------------------|:-----------------------------------------------------
+Atomic Vector    |                          |  `x[[1]]` <br/> `x[1]`
+List             |  `x[[1]]`                |  `x[1]`
+Matrix / Array   |  `x[[1]]` <br/> `x[1, ]` <br/> `x[, 1]` |  `x[1, , drop=FALSE]` <br/> `x[, 1, drop=FALSE]`
+Factor           |  `x[1:4, drop=TRUE]`     |  `x[1:4]` <br/> `x[[1]]`
+Data frame       |  `x[, 1]` <br/> `x[[1]]` |  `x[, 1, drop=FALSE]` <br/> `x[1]`
+
+---
+class: middle
+count: false
+
+# Subsetting and assignment
+
+---
+
+## Subsetting and assignment
+
+Subsets can also be used with assignment to update specific values within an object.
+
+```{r}
+x = c(1, 4, 7)
+```
+
+```{r}
+x[2] = 2
+x
+x[x %% 2 != 0] = x[x %% 2 != 0] + 1
+x
+x[c(1,1)] = c(2,3)
+x
+```
+
+---
+
+.pull-left[
+```{r}
+x = 1:6
+x[c(2,NA)] = 1
+x
+```
+
+```{r}
+x = 1:6
+x[c(TRUE,NA)] = 1
+x
+```
+]
+
+.pull-right[
+```{r}
+x = 1:6
+x[c(-1,-3)] = 3
+x
+```
+
+```{r}
+x = 1:6
+x[] = 6:1
+x
+```
+]
+
+---
+
+## Subsets of Subsets
+
+```{r}
+df = data.frame(a = c(5,1,NA,3))
+```
+
+```{r}
+df$a[df$a == 5] = 0
+df
+```
+
+
+```{r}
+df[1][df[1] == 3] = 0
+df
+```
 
 ---
 
 ## Exercise 2
 
-Represent the following JSON data as a list in R.
+Some data providers choose to encode missing values using values like `-999`. Below is a sample data frame with missing values encoded in this way. 
 
-```json
-{
-  "firstName": "John",
-  "lastName": "Smith",
-  "age": 25,
-  "address": 
-  {
-    "streetAddress": "21 2nd Street",
-    "city": "New York",
-    "state": "NY",
-    "postalCode": 10021
-  },
-  "phoneNumber": 
-  [
-    {
-      "type": "home",
-      "number": "212 555-1239"
-    },
-    {
-      "type": "fax",
-      "number": "646 555-4567"
-    }
-  ]
-}
+```{r}
+d = data.frame(
+  patient_id = c(1, 2, 3, 4, 5),
+  age = c(32, 27, 56, 19, 65),
+  bp = c(110, 100, 125, -999, -999),
+  o2 = c(97, 95, -999, -999, 99)
+)
 ```
+
+* *Task 1* - using the subsetting tools we've discussed come up with code that will replace the `-999` values in the `bp` and `o2` column with actual `NA` values. Save this as `d_na`.
+
+* *Task 2* - Once you have created `d_na` come up with code that translate it back into the original data frame `d`, i.e. replace the `NA`s with `-999`.
 
 ---
 
-# Acknowledgments
 ## Acknowledgments
 
 Above materials are derived in part from the following sources:

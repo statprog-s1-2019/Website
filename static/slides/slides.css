@@ -34,14 +34,6 @@ a, a > code {
   font-size: 80%;
 }
 
-.footnote::before {
-  content: "[";
-}
-
-.footnote::after {
-  content: "]"
-}
-
 .remark-code, .remark-inline-code { 
   font-family: 'Inconsolata', 'Lucida Console', Monaco, monospace; 
 }
@@ -84,8 +76,10 @@ a, a > code {
   float: right;
   width: 47%;
 }
-.pull-right ~ * {
+.pull-right::after {
+  content: "";
   clear: both;
+  display: table-column-group;
 }
 
 .col1 {
@@ -203,3 +197,5 @@ thead, tfoot, tr:nth-child(even) { background: #eee }
 .remark-slide-number {
   visibility: hidden;
 }
+
+
