@@ -21,8 +21,10 @@ clean:
 push: build
 	@cd docs/;  \
 	 git add .; \
-	 git commit -m "Update site content"; \
-	 git push
+	 git commit -m "Update site content";
+	git add docs; \
+		git commit -m "Update docs submodule";
+		git push;
 	
 
 static/slides/%.html: static/slides/%.Rmd

@@ -70,16 +70,14 @@ a, a > code {
 }
 .pull-left {
   float: left;
-  width: 47%;
+  width: 49%;
 }
 .pull-right {
   float: right;
-  width: 47%;
+  width: 49%;
 }
-.pull-right::after {
-  content: "";
+.pull-right ~ p {
   clear: both;
-  display: table-column-group;
 }
 
 .col1 {
@@ -167,8 +165,8 @@ thead, tfoot, tr:nth-child(even) { background: #eee }
 
 .remark-slide-content{
   font-size: 24px;
-  padding-left: 2em;
-  padding-right: 2em;
+  padding-left: 1em;
+  padding-right: 1em;
   padding-top: 0.5em;
 }
 
