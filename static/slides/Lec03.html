@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Tidy Data, dplyr, and tidyr</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Colin Rundel" />
+    <meta name="date" content="2019-09-30" />
+    <link rel="stylesheet" href="slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Tidy Data, dplyr, and tidyr
+### Colin Rundel
+### 2019-09-30
+
+---
+
+exclude: true
+
+
+
+---
+class: middle
+count: false
+
+.center[
+&lt;img src="imgs/hex-tidyverse.png" width="50%" /&gt;
+]
+
+---
+
+## Tidy data
+
+&lt;img src="imgs/tidy.png" width="100%" /&gt;
+* One variable per column
+* One observation per row
+* Each type of observational unit forms a table
+
+.footnote[ From R4DS - [tidy data](r4ds.had.co.nz/tidy-data.html) ]
+
+
+---
+class: middle
+count: false
+
+.center[
+&lt;img src="imgs/hex-tibble.png" width="50%" /&gt;
+]
+
+---
+
+## Modern data frames
+
+Hadley Wickham / RStudio have a package that modifies data frames to be more modern, or as he calls them surly and lazy.
+
+
+```r
+library(tibble)
+class(iris)
+```
+
+```
+## [1] "data.frame"
+```
+
+```r
+tbl_iris = as_tibble(iris)
+class(tbl_iris)
+```
+
+```
+## [1] "tbl_df"     "tbl"        "data.frame"
+```
+
+---
+
+## Fancy Printing
+
+.font_small[
+
+```r
+tbl_iris
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 150 x 5&lt;/span&gt;&lt;span&gt;
+##    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+##           &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;        &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;fct&amp;gt;&lt;/span&gt;&lt;span&gt;  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;          5.1         3.5          1.4         0.2 setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;          4.9         3            1.4         0.2 setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;          4.7         3.2          1.3         0.2 setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;          4.6         3.1          1.5         0.2 setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;          5           3.6          1.4         0.2 setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;          5.4         3.9          1.7         0.4 setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;          4.6         3.4          1.4         0.3 setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;          5           3.4          1.5         0.2 setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;          4.4         2.9          1.4         0.2 setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;          4.9         3.1          1.5         0.1 setosa 
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 140 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+```r
+iris
+```
+
+```
+##     Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
+## 1            5.1         3.5          1.4         0.2     setosa
+## 2            4.9         3.0          1.4         0.2     setosa
+## 3            4.7         3.2          1.3         0.2     setosa
+## 4            4.6         3.1          1.5         0.2     setosa
+## 5            5.0         3.6          1.4         0.2     setosa
+## 6            5.4         3.9          1.7         0.4     setosa
+## 7            4.6         3.4          1.4         0.3     setosa
+## 8            5.0         3.4          1.5         0.2     setosa
+## 9            4.4         2.9          1.4         0.2     setosa
+## 10           4.9         3.1          1.5         0.1     setosa
+## 11           5.4         3.7          1.5         0.2     setosa
+## 12           4.8         3.4          1.6         0.2     setosa
+## 13           4.8         3.0          1.4         0.1     setosa
+## 14           4.3         3.0          1.1         0.1     setosa
+## 15           5.8         4.0          1.2         0.2     setosa
+## 16           5.7         4.4          1.5         0.4     setosa
+## 17           5.4         3.9          1.3         0.4     setosa
+## 18           5.1         3.5          1.4         0.3     setosa
+## 19           5.7         3.8          1.7         0.3     setosa
+## 20           5.1         3.8          1.5         0.3     setosa
+## 21           5.4         3.4          1.7         0.2     setosa
+## 22           5.1         3.7          1.5         0.4     setosa
+## 23           4.6         3.6          1.0         0.2     setosa
+## 24           5.1         3.3          1.7         0.5     setosa
+## 25           4.8         3.4          1.9         0.2     setosa
+## 26           5.0         3.0          1.6         0.2     setosa
+## 27           5.0         3.4          1.6         0.4     setosa
+## 28           5.2         3.5          1.5         0.2     setosa
+## 29           5.2         3.4          1.4         0.2     setosa
+## 30           4.7         3.2          1.6         0.2     setosa
+## 31           4.8         3.1          1.6         0.2     setosa
+## 32           5.4         3.4          1.5         0.4     setosa
+## 33           5.2         4.1          1.5         0.1     setosa
+## 34           5.5         4.2          1.4         0.2     setosa
+## 35           4.9         3.1          1.5         0.2     setosa
+## 36           5.0         3.2          1.2         0.2     setosa
+## 37           5.5         3.5          1.3         0.2     setosa
+## 38           4.9         3.6          1.4         0.1     setosa
+## 39           4.4         3.0          1.3         0.2     setosa
+## 40           5.1         3.4          1.5         0.2     setosa
+## 41           5.0         3.5          1.3         0.3     setosa
+## 42           4.5         2.3          1.3         0.3     setosa
+## 43           4.4         3.2          1.3         0.2     setosa
+## 44           5.0         3.5          1.6         0.6     setosa
+## 45           5.1         3.8          1.9         0.4     setosa
+## 46           4.8         3.0          1.4         0.3     setosa
+## 47           5.1         3.8          1.6         0.2     setosa
+## 48           4.6         3.2          1.4         0.2     setosa
+## 49           5.3         3.7          1.5         0.2     setosa
+## 50           5.0         3.3          1.4         0.2     setosa
+## 51           7.0         3.2          4.7         1.4 versicolor
+## 52           6.4         3.2          4.5         1.5 versicolor
+## 53           6.9         3.1          4.9         1.5 versicolor
+## 54           5.5         2.3          4.0         1.3 versicolor
+## 55           6.5         2.8          4.6         1.5 versicolor
+## 56           5.7         2.8          4.5         1.3 versicolor
+## 57           6.3         3.3          4.7         1.6 versicolor
+## 58           4.9         2.4          3.3         1.0 versicolor
+## 59           6.6         2.9          4.6         1.3 versicolor
+## 60           5.2         2.7          3.9         1.4 versicolor
+## 61           5.0         2.0          3.5         1.0 versicolor
+## 62           5.9         3.0          4.2         1.5 versicolor
+## 63           6.0         2.2          4.0         1.0 versicolor
+## 64           6.1         2.9          4.7         1.4 versicolor
+## 65           5.6         2.9          3.6         1.3 versicolor
+## 66           6.7         3.1          4.4         1.4 versicolor
+## 67           5.6         3.0          4.5         1.5 versicolor
+## 68           5.8         2.7          4.1         1.0 versicolor
+## 69           6.2         2.2          4.5         1.5 versicolor
+## 70           5.6         2.5          3.9         1.1 versicolor
+## 71           5.9         3.2          4.8         1.8 versicolor
+## 72           6.1         2.8          4.0         1.3 versicolor
+## 73           6.3         2.5          4.9         1.5 versicolor
+## 74           6.1         2.8          4.7         1.2 versicolor
+## 75           6.4         2.9          4.3         1.3 versicolor
+## 76           6.6         3.0          4.4         1.4 versicolor
+## 77           6.8         2.8          4.8         1.4 versicolor
+## 78           6.7         3.0          5.0         1.7 versicolor
+## 79           6.0         2.9          4.5         1.5 versicolor
+## 80           5.7         2.6          3.5         1.0 versicolor
+## 81           5.5         2.4          3.8         1.1 versicolor
+## 82           5.5         2.4          3.7         1.0 versicolor
+## 83           5.8         2.7          3.9         1.2 versicolor
+## 84           6.0         2.7          5.1         1.6 versicolor
+## 85           5.4         3.0          4.5         1.5 versicolor
+## 86           6.0         3.4          4.5         1.6 versicolor
+## 87           6.7         3.1          4.7         1.5 versicolor
+## 88           6.3         2.3          4.4         1.3 versicolor
+## 89           5.6         3.0          4.1         1.3 versicolor
+## 90           5.5         2.5          4.0         1.3 versicolor
+## 91           5.5         2.6          4.4         1.2 versicolor
+## 92           6.1         3.0          4.6         1.4 versicolor
+## 93           5.8         2.6          4.0         1.2 versicolor
+## 94           5.0         2.3          3.3         1.0 versicolor
+## 95           5.6         2.7          4.2         1.3 versicolor
+## 96           5.7         3.0          4.2         1.2 versicolor
+## 97           5.7         2.9          4.2         1.3 versicolor
+## 98           6.2         2.9          4.3         1.3 versicolor
+## 99           5.1         2.5          3.0         1.1 versicolor
+## 100          5.7         2.8          4.1         1.3 versicolor
+## 101          6.3         3.3          6.0         2.5  virginica
+## 102          5.8         2.7          5.1         1.9  virginica
+## 103          7.1         3.0          5.9         2.1  virginica
+## 104          6.3         2.9          5.6         1.8  virginica
+## 105          6.5         3.0          5.8         2.2  virginica
+## 106          7.6         3.0          6.6         2.1  virginica
+## 107          4.9         2.5          4.5         1.7  virginica
+## 108          7.3         2.9          6.3         1.8  virginica
+## 109          6.7         2.5          5.8         1.8  virginica
+## 110          7.2         3.6          6.1         2.5  virginica
+## 111          6.5         3.2          5.1         2.0  virginica
+## 112          6.4         2.7          5.3         1.9  virginica
+## 113          6.8         3.0          5.5         2.1  virginica
+## 114          5.7         2.5          5.0         2.0  virginica
+## 115          5.8         2.8          5.1         2.4  virginica
+## 116          6.4         3.2          5.3         2.3  virginica
+## 117          6.5         3.0          5.5         1.8  virginica
+## 118          7.7         3.8          6.7         2.2  virginica
+## 119          7.7         2.6          6.9         2.3  virginica
+## 120          6.0         2.2          5.0         1.5  virginica
+## 121          6.9         3.2          5.7         2.3  virginica
+## 122          5.6         2.8          4.9         2.0  virginica
+## 123          7.7         2.8          6.7         2.0  virginica
+## 124          6.3         2.7          4.9         1.8  virginica
+## 125          6.7         3.3          5.7         2.1  virginica
+## 126          7.2         3.2          6.0         1.8  virginica
+## 127          6.2         2.8          4.8         1.8  virginica
+## 128          6.1         3.0          4.9         1.8  virginica
+## 129          6.4         2.8          5.6         2.1  virginica
+## 130          7.2         3.0          5.8         1.6  virginica
+## 131          7.4         2.8          6.1         1.9  virginica
+## 132          7.9         3.8          6.4         2.0  virginica
+## 133          6.4         2.8          5.6         2.2  virginica
+## 134          6.3         2.8          5.1         1.5  virginica
+## 135          6.1         2.6          5.6         1.4  virginica
+## 136          7.7         3.0          6.1         2.3  virginica
+## 137          6.3         3.4          5.6         2.4  virginica
+## 138          6.4         3.1          5.5         1.8  virginica
+## 139          6.0         3.0          4.8         1.8  virginica
+## 140          6.9         3.1          5.4         2.1  virginica
+## 141          6.7         3.1          5.6         2.4  virginica
+## 142          6.9         3.1          5.1         2.3  virginica
+## 143          5.8         2.7          5.1         1.9  virginica
+## 144          6.8         3.2          5.9         2.3  virginica
+## 145          6.7         3.3          5.7         2.5  virginica
+## 146          6.7         3.0          5.2         2.3  virginica
+## 147          6.3         2.5          5.0         1.9  virginica
+## 148          6.5         3.0          5.2         2.0  virginica
+## 149          6.2         3.4          5.4         2.3  virginica
+## 150          5.9         3.0          5.1         1.8  virginica
+```
+]
+
+---
+
+.font_small[
+
+```r
+df = data.frame(x = rnorm(10,sd=5), y = rnorm(10), z = runif(10))
+```
+
+
+```r
+as_tibble(df)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 10 x 3&lt;/span&gt;&lt;span&gt;
+##         x        y     z
+##     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;8.38&lt;/span&gt;&lt;span&gt;  -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.532&lt;/span&gt;&lt;span&gt;   0.457
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2.37&lt;/span&gt;&lt;span&gt;   0.125   0.612
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  1.57  -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.199&lt;/span&gt;&lt;span&gt;   1.000
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  1.78   0.834   0.748
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.439&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1.48&lt;/span&gt;&lt;span&gt;    0.165
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.879&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.273&lt;/span&gt;&lt;span&gt;   0.977
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1.55&lt;/span&gt;&lt;span&gt;   0.260   0.530
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1.29&lt;/span&gt;&lt;span&gt;  -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.311&lt;/span&gt;&lt;span&gt;   0.939
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2.53&lt;/span&gt;&lt;span&gt;  -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.007&lt;/span&gt;&lt;span style='color: #BB0000;text-decoration: underline;'&gt;95&lt;/span&gt;&lt;span&gt; 0.713
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3.84&lt;/span&gt;&lt;span&gt;  -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.634&lt;/span&gt;&lt;span&gt;   0.521
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+```r
+df
+```
+
+```
+##             x            y         z
+## 1  -8.3777858 -0.531554492 0.4572578
+## 2  -2.3655263  0.125242011 0.6118571
+## 3   1.5721331 -0.199320280 0.9999149
+## 4   1.7813048  0.833755021 0.7479874
+## 5  -0.4392690 -1.476324115 0.1651651
+## 6  -0.8792162 -0.272865204 0.9772709
+## 7  -1.5495510  0.259754561 0.5299442
+## 8  -1.2856277 -0.310655344 0.9390027
+## 9  -2.5291995 -0.007954749 0.7128745
+## 10 -3.8357677 -0.634263557 0.5212983
+```
+]
+
+---
+
+## Tibbles are lazy
+
+
+```r
+tbl_iris[1,]
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 1 x 5&lt;/span&gt;&lt;span&gt;
+##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+##          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;        &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;fct&amp;gt;&lt;/span&gt;&lt;span&gt;  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt;          5.1         3.5          1.4         0.2 setosa
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+--
+
+.pull-left[
+
+```r
+tbl_iris[,"Species"]
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 150 x 1&lt;/span&gt;&lt;span&gt;
+##    Species
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;fct&amp;gt;&lt;/span&gt;&lt;span&gt;  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; setosa 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; setosa 
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 140 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+--
+
+.pull-right[
+
+```r
+tibble(
+  x = 1:3, 
+  y = c("A","B","C")
+)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 3 x 2&lt;/span&gt;&lt;span&gt;
+##       x y    
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt;     1 A    
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt;     2 B    
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt;     3 C
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+---
+
+## More laziness
+
+.pull-left[
+
+```r
+head( tbl_iris[1] )
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 6 x 1&lt;/span&gt;&lt;span&gt;
+##   Sepal.Length
+##          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt;          5.1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt;          4.9
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt;          4.7
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt;          4.6
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;5&lt;/span&gt;&lt;span&gt;          5  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;6&lt;/span&gt;&lt;span&gt;          5.4
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+--
+
+.pull-right[
+
+```r
+head( tbl_iris[[1]] )
+```
+
+```
+## [1] 5.1 4.9 4.7 4.6 5.0 5.4
+```
+]
+
+--
+
+&lt;br/&gt;
+
+.font_small[
+
+```r
+head( iris$Sp )
+```
+
+```
+## [1] setosa setosa setosa setosa setosa setosa
+## Levels: setosa versicolor virginica
+```
+
+```r
+tbl_iris$Sp
+```
+
+```
+## Warning: Unknown or uninitialised column: 'Sp'.
+```
+
+```
+## NULL
+```
+
+```r
+head( tbl_iris$Species )
+```
+
+```
+## [1] setosa setosa setosa setosa setosa setosa
+## Levels: setosa versicolor virginica
+```
+]
+
+
+---
+
+## Tibbles and length coercion
+
+
+```r
+tibble(x = 1:4, y = 1)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 4 x 2&lt;/span&gt;&lt;span&gt;
+##       x     y
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt;     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt;     2     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt;     3     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt;     4     1
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+--
+
+
+```r
+tibble(x = 1:4, y = 1:2)
+```
+
+```
+## Tibble columns must have consistent lengths, only values of length one are recycled:
+## * Length 2: Column `y`
+## * Length 4: Column `x`
+```
+
+--
+
+
+```r
+tibble(x = 1:4, y = 1:3)
+```
+
+```
+## Tibble columns must have consistent lengths, only values of length one are recycled:
+## * Length 3: Column `y`
+## * Length 4: Column `x`
+```
+
+
+---
+
+## Tibbles and S3
+
+
+```r
+d = tibble(
+  x = 1:3, 
+  y = c("A","B","C")
+)
+
+class(d)
+```
+
+```
+## [1] "tbl_df"     "tbl"        "data.frame"
+```
+
+--
+
+&lt;br/&gt;
+
+
+```r
+class(d) = rev(class(d))
+class(d)
+```
+
+```
+## [1] "data.frame" "tbl"        "tbl_df"
+```
+
+```r
+d
+```
+
+```
+##   x y
+## 1 1 A
+## 2 2 B
+## 3 3 C
+```
+
+
+---
+class: middle
+count: false
+
+.center[
+&lt;img src="imgs/hex-magrittr.jpg" width="50%" /&gt;
+
+# magrittr
+]
+
+---
+
+## Pipes in R
+
+You can think about the following sequence of actions - find key, unlock car, start car, drive to school, park.
+
+&lt;br/&gt;
+
+Expressed as a set of nested functions in R pseudocode this would look like:
+
+
+```r
+park(drive(start_car(find("keys")), to="campus"))
+```
+
+&lt;br/&gt;
+
+Writing it out using pipes give it a more natural (and easier to read) structure:
+
+
+```r
+find("keys") %&gt;%
+    start_car() %&gt;%
+    drive(to="campus") %&gt;%
+    park()
+```
+
+---
+
+## Approaches
+
+All of the following are fine, it comes down to personal preference:
+
+&lt;br/&gt;
+Nested:
+
+```r
+h( g( f(x), y=1), z=1 )
+```
+
+&lt;br/&gt;
+Piped:
+
+```r
+f(x) %&gt;% g(y=1) %&gt;% h(z=1)
+```
+
+&lt;br/&gt;
+Intermediate:
+
+```r
+res = f(x)
+res = g(res, y=1)
+res = h(res, z=1)
+```
+
+---
+
+## What about other arguments?
+
+Sometimes we want to send our results to an function argument other than first one or we want to use the previous result for multiple arguments. In these cases we can refer to the previous result using `.`.
+
+--
+
+
+```r
+data.frame(a = 1:3, b = 3:1) %&gt;% lm(a~b, data=.)
+```
+
+```
+## 
+## Call:
+## lm(formula = a ~ b, data = .)
+## 
+## Coefficients:
+## (Intercept)            b  
+##           4           -1
+```
+
+--
+
+
+```r
+data.frame(a = 1:3, b = 3:1) %&gt;% .[[1]]
+```
+
+```
+## [1] 1 2 3
+```
+
+--
+
+
+```r
+data.frame(a = 1:3, b = 3:1) %&gt;% .[[length(.)]]
+```
+
+```
+## [1] 3 2 1
+```
+
+
+---
+class: middle
+
+.center[
+&lt;img src="imgs/hex-dplyr.png" width="50%" /&gt;
+]
+
+---
+
+## A Grammar of Data Manipulation
+
+dplyr is based on the concepts of functions as verbs that manipulate data frames.
+
+Single data frame functions / verbs:
+
+* `filter()` / `slice()`: pick rows based on criteria
+* `select()` / `rename()`: select columns by name
+* `pull()`: grab a column as a vector
+* `arrange()`: reorder rows
+* `mutate()` / `transmute()`: add new variables
+* `distinct()`: filter for unique rows
+* `sample_n()` / `sample_frac()`: randomly sample rows
+* `summarise()` / `count()`: reduce variables to values
+* `group_by()` / `ungroup()`: modify other verbs to act on subsets
+* ... (many more)
+
+---
+
+## dplyr rules
+
+1. First argument is *always* a data frame
+
+2. Subsequent arguments say what to do with that data frame
+
+3. *Always* return a data frame
+
+4. Don't modify in place
+
+5. Lazy evaluation magic
+
+
+---
+
+## Example Data
+
+We will demonstrate dplyr's functionality using the nycflights13 data.
+
+
+```r
+library(dplyr)
+library(nycflights13)
+
+flights
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 19&lt;/span&gt;&lt;span&gt;
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      517            515         2      830            819
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      533            529         4      850            830
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      542            540         2      923            850
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      544            545        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;004           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;022
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      554            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      812            837
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      554            558        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;      740            728
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      555            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;      913            854
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      709            723
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      838            846
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      558            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;      753            745
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows, and 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## filter() - March flights
+
+
+```r
+flights %&gt;% filter(month == 3)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 28,834 x 19&lt;/span&gt;&lt;span&gt;
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1        4           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;159       125      318             56
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1       50           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;358        52      526            438
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      117           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;245       152      223           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;354
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      454            500        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      633            648
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      505            515       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;10&lt;/span&gt;&lt;span&gt;      746            810
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      521            530        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;9&lt;/span&gt;&lt;span&gt;      813            827
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      537            540        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      856            850
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      541            545        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;014           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;023
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      549            600       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;11&lt;/span&gt;&lt;span&gt;      639            703
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      550            600       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;10&lt;/span&gt;&lt;span&gt;      747            801
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 28,824 more rows, and 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## filter() - Flights in the first 7 days of March
+
+
+```r
+flights %&gt;% filter(month == 3, day &lt;= 7)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 6,530 x 19&lt;/span&gt;&lt;span&gt;
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1        4           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;159       125      318             56
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1       50           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;358        52      526            438
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      117           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;245       152      223           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;354
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      454            500        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      633            648
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      505            515       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;10&lt;/span&gt;&lt;span&gt;      746            810
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      521            530        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;9&lt;/span&gt;&lt;span&gt;      813            827
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      537            540        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      856            850
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      541            545        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;014           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;023
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      549            600       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;11&lt;/span&gt;&lt;span&gt;      639            703
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      550            600       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;10&lt;/span&gt;&lt;span&gt;      747            801
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 6,520 more rows, and 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## filter() - Flights to LAX *or* JFK in March
+
+
+```r
+flights %&gt;% filter(dest == "LAX" | dest == "JFK", month==3)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 1,178 x 19&lt;/span&gt;&lt;span&gt;
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      607            610        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      832            925
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      629            632        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      844            952
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      657            700        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      953           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;034
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      714            715        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;      939           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;037
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      716            710         6      958           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;035
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      727            730        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;007           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;100
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      836            840        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;111           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;157
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      857            900        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;202           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;221
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      903            900         3     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;157           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;220
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     1      904            831        33     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;150           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;151
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 1,168 more rows, and 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## slice() - First 10 flights
+
+
+```r
+flights %&gt;% slice(1:10)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 10 x 19&lt;/span&gt;&lt;span&gt;
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      517            515         2      830            819
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      533            529         4      850            830
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      542            540         2      923            850
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      544            545        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;004           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;022
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      554            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      812            837
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      554            558        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;      740            728
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      555            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;      913            854
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      709            723
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      838            846
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      558            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;      753            745
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## slice() - Last 5 flights
+
+
+```r
+flights %&gt;% slice((n()-4):n())
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 5 x 19&lt;/span&gt;&lt;span&gt;
+##    year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     9    30       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;455        &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;634
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     9    30       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;200        &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;312
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     9    30       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;210        &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;330
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     9    30       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;159        &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;344
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     9    30       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;            840        &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;020
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## select() - Individual Columns
+
+
+```r
+flights %&gt;% select(year, month, day)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 3&lt;/span&gt;&lt;span&gt;
+##     year month   day
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## select() - Exclude Columns
+
+
+```r
+flights %&gt;% select(-year, -month, -day)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 16&lt;/span&gt;&lt;span&gt;
+##    dep_time sched_dep_time dep_delay arr_time sched_arr_time arr_delay carrier
+##       &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;      517            515         2      830            819        11 UA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;      533            529         4      850            830        20 UA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;      542            540         2      923            850        33 AA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;      544            545        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;004           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;022       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;18&lt;/span&gt;&lt;span&gt; B6     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;      554            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      812            837       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;25&lt;/span&gt;&lt;span&gt; DL     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;      554            558        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;      740            728        12 UA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;      555            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;      913            854        19 B6     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      709            723       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;14&lt;/span&gt;&lt;span&gt; EV     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      838            846        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;8&lt;/span&gt;&lt;span&gt; B6     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;      558            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;      753            745         8 AA     
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows, and 9 more variables: flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## select() - Ranges
+
+
+```r
+flights %&gt;% select(year:day)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 3&lt;/span&gt;&lt;span&gt;
+##     year month   day
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## select() - Exclusion Ranges
+
+
+```r
+flights %&gt;% select(-(year:day))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 16&lt;/span&gt;&lt;span&gt;
+##    dep_time sched_dep_time dep_delay arr_time sched_arr_time arr_delay carrier
+##       &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;      517            515         2      830            819        11 UA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;      533            529         4      850            830        20 UA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;      542            540         2      923            850        33 AA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;      544            545        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;004           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;022       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;18&lt;/span&gt;&lt;span&gt; B6     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;      554            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      812            837       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;25&lt;/span&gt;&lt;span&gt; DL     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;      554            558        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;      740            728        12 UA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;      555            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;      913            854        19 B6     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      709            723       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;14&lt;/span&gt;&lt;span&gt; EV     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      838            846        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;8&lt;/span&gt;&lt;span&gt; B6     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;      558            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;      753            745         8 AA     
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows, and 9 more variables: flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+class: split-50
+
+## select() - Matching
+
+
+```r
+flights %&gt;% select(contains("dep"), 
+                   contains("arr"))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 7&lt;/span&gt;&lt;span&gt;
+##    dep_time sched_dep_time dep_delay arr_time sched_arr_time arr_delay carrier
+##       &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;      517            515         2      830            819        11 UA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;      533            529         4      850            830        20 UA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;      542            540         2      923            850        33 AA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;      544            545        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;004           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;022       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;18&lt;/span&gt;&lt;span&gt; B6     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;      554            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      812            837       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;25&lt;/span&gt;&lt;span&gt; DL     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;      554            558        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;      740            728        12 UA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;      555            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;      913            854        19 B6     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      709            723       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;14&lt;/span&gt;&lt;span&gt; EV     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      838            846        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;8&lt;/span&gt;&lt;span&gt; B6     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;      558            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;      753            745         8 AA     
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+
+```r
+flights %&gt;% select(starts_with("dep"), 
+                   starts_with("arr"))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 4&lt;/span&gt;&lt;span&gt;
+##    dep_time dep_delay arr_time arr_delay
+##       &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;      517         2      830        11
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;      533         4      850        20
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;      542         2      923        33
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;      544        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;004       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;18&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;      554        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      812       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;25&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;      554        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;      740        12
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;      555        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;      913        19
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;      557        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      709       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;14&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;      557        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      838        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;8&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;      558        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;      753         8
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+
+Some other helpers (provide by tidyselect): 
+.center[
+  `starts_with`, `ends_with`, `everything`, `matches`, `num_range`, `one_of`, `everything`, `last_col`.
+]
+
+---
+
+## select_if() - Get non-numeric columns
+
+
+```r
+flights %&gt;% select_if(function(x) !is.numeric(x))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 5&lt;/span&gt;&lt;span&gt;
+##    carrier tailnum origin dest  time_hour          
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;             
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; UA      N14228  EWR    IAH   2013-01-01 &lt;/span&gt;&lt;span style='color: #949494;'&gt;05:00:00&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; UA      N24211  LGA    IAH   2013-01-01 &lt;/span&gt;&lt;span style='color: #949494;'&gt;05:00:00&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; AA      N619AA  JFK    MIA   2013-01-01 &lt;/span&gt;&lt;span style='color: #949494;'&gt;05:00:00&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; B6      N804JB  JFK    BQN   2013-01-01 &lt;/span&gt;&lt;span style='color: #949494;'&gt;05:00:00&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; DL      N668DN  LGA    ATL   2013-01-01 &lt;/span&gt;&lt;span style='color: #949494;'&gt;06:00:00&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; UA      N39463  EWR    ORD   2013-01-01 &lt;/span&gt;&lt;span style='color: #949494;'&gt;05:00:00&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; B6      N516JB  EWR    FLL   2013-01-01 &lt;/span&gt;&lt;span style='color: #949494;'&gt;06:00:00&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; EV      N829AS  LGA    IAD   2013-01-01 &lt;/span&gt;&lt;span style='color: #949494;'&gt;06:00:00&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; B6      N593JB  JFK    MCO   2013-01-01 &lt;/span&gt;&lt;span style='color: #949494;'&gt;06:00:00&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; AA      N3ALAA  LGA    ORD   2013-01-01 &lt;/span&gt;&lt;span style='color: #949494;'&gt;06:00:00&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+
+---
+
+## rename() - Change column names
+
+
+```r
+flights %&gt;% rename(tail_number = tailnum)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 19&lt;/span&gt;&lt;span&gt;
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      517            515         2      830            819
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      533            529         4      850            830
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      542            540         2      923            850
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      544            545        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;004           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;022
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      554            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      812            837
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      554            558        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;      740            728
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      555            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;      913            854
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      709            723
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      838            846
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      558            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;      753            745
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows, and 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, tail_number &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+ 
+---
+
+## select() vs. rename()
+
+.small[
+
+```r
+flights %&gt;% select(tail_number = tailnum)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 1&lt;/span&gt;&lt;span&gt;
+##    tail_number
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;      
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; N14228     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; N24211     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; N619AA     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; N804JB     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; N668DN     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; N39463     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; N516JB     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; N829AS     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; N593JB     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; N3ALAA     
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+```r
+flights %&gt;% rename(tail_number = tailnum)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 19&lt;/span&gt;&lt;span&gt;
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      517            515         2      830            819
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      533            529         4      850            830
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      542            540         2      923            850
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      544            545        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;004           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;022
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      554            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      812            837
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      554            558        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;      740            728
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      555            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;      913            854
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      709            723
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      838            846
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      558            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;      753            745
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows, and 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, tail_number &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+---
+
+## pull()
+
+
+```r
+names(flights)
+```
+
+```
+##  [1] "year"           "month"          "day"            "dep_time"      
+##  [5] "sched_dep_time" "dep_delay"      "arr_time"       "sched_arr_time"
+##  [9] "arr_delay"      "carrier"        "flight"         "tailnum"       
+## [13] "origin"         "dest"           "air_time"       "distance"      
+## [17] "hour"           "minute"         "time_hour"
+```
+
+```r
+flights %&gt;% pull("year") %&gt;% head()
+```
+
+```
+## [1] 2013 2013 2013 2013 2013 2013
+```
+
+```r
+flights %&gt;% pull(1) %&gt;% head()
+```
+
+```
+## [1] 2013 2013 2013 2013 2013 2013
+```
+
+```r
+flights %&gt;% pull(-1) %&gt;% head()
+```
+
+```
+## [1] "2013-01-01 05:00:00 EST" "2013-01-01 05:00:00 EST"
+## [3] "2013-01-01 05:00:00 EST" "2013-01-01 05:00:00 EST"
+## [5] "2013-01-01 06:00:00 EST" "2013-01-01 05:00:00 EST"
+```
+
+---
+
+## arrange() - Sort data
+
+
+```r
+flights %&gt;% filter(month==3,day==2) %&gt;% arrange(origin, dest)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 765 x 19&lt;/span&gt;&lt;span&gt;
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     2     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;336           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;329         7     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;426           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;432
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     2      628            629        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;      837            849
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     2      637            640        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      903            915
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     2      743            745        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;      945           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;010
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     2      857            900        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;117           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;126
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     2     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;027           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;030        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;234           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;247
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     2     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;134           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;145       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;11&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;332           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;359
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     2     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;412           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;415        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;636           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;630
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     2     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;633           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;636        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;848           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;908
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     2     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;655           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;700        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;857           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;924
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 755 more rows, and 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## arrange() &amp; desc() - Descending order
+
+
+```r
+flights %&gt;% filter(month==3,day==2) %&gt;% arrange(desc(origin), dest) %&gt;% select(origin, dest, tailnum)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 765 x 3&lt;/span&gt;&lt;span&gt;
+##    origin dest  tailnum
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; LGA    ATL   N928AT 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; LGA    ATL   N623DL 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; LGA    ATL   N680DA 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; LGA    ATL   N996AT 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; LGA    ATL   N510MQ 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; LGA    ATL   N663DN 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; LGA    ATL   N942DL 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; LGA    ATL   N511MQ 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; LGA    ATL   N910DE 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; LGA    ATL   N902DE 
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 755 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## mutate() - Modify columns
+
+
+```r
+flights %&gt;% select(year:day) %&gt;% mutate(date = paste(year,month,day,sep="/"))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 4&lt;/span&gt;&lt;span&gt;
+##     year month   day date    
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;   
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## transmute() - Create new tibble from existing columns
+
+
+```r
+flights %&gt;% select(year:day) %&gt;% transmute(date = paste(year,month,day,sep="/"))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 1&lt;/span&gt;&lt;span&gt;
+##    date    
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;   
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; 2013/1/1
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## distinct() - Find unique rows
+
+
+```r
+flights %&gt;% select(origin, dest) %&gt;% distinct() %&gt;% arrange(origin,dest)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 224 x 2&lt;/span&gt;&lt;span&gt;
+##    origin dest 
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; EWR    ALB  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; EWR    ANC  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; EWR    ATL  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; EWR    AUS  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; EWR    AVL  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; EWR    BDL  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; EWR    BNA  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; EWR    BOS  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; EWR    BQN  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; EWR    BTV  
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 214 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## Sampling rows
+
+.small[
+
+```r
+flights %&gt;% sample_n(10)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 10 x 19&lt;/span&gt;&lt;span&gt;
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     9    23     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;711           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;652        19     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;826           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;823
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     9    21     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;011           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;025       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;14&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;315           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;325
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     2     5      852            855        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;100           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;104
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    10    24     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;001           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;006        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;210           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;213
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     2     5     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;139           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;140        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;455           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;450
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     8     8      654            700        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      927            947
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     6    25     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;800           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;640        80     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;908           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;813
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    10     1     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;936           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;940        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;117           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;125
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    12    18     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;111           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;115        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;309           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;315
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     2    10      844            845        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;410           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;350
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+```r
+flights %&gt;% sample_frac(0.00003)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 10 x 19&lt;/span&gt;&lt;span&gt;
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1    15     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;500           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;504        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;641           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;640
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     2    23      558            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;      653            705
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     5    17     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;258           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;300        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;445           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;435
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     2    19     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;016           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;825       111     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;217           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;030
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    10     2      734            740        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      850            900
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     8    29     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;025           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;014        11     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;223           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;208
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     8    13      934            900        34     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;211           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;126
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    11     2      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      833            829
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    12    20     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;310           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;315        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;608           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;620
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1    17      811            803         8      922            918
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+---
+
+## summarise()
+
+
+```r
+flights %&gt;% summarize(n(), min(dep_delay), max(dep_delay))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 1 x 3&lt;/span&gt;&lt;span&gt;
+##    `n()` `min(dep_delay)` `max(dep_delay)`
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;            &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;            &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;336&lt;/span&gt;&lt;span&gt;776               &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;               &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+--
+
+
+```r
+flights %&gt;% 
+  summarize(
+    n = n(), 
+    min_dep_delay = min(dep_delay, na.rm = TRUE), 
+    max_dep_delay = max(dep_delay, na.rm = TRUE)
+  )
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 1 x 3&lt;/span&gt;&lt;span&gt;
+##        n min_dep_delay max_dep_delay
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;         &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;         &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;336&lt;/span&gt;&lt;span&gt;776           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;43&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;301
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## group_by()
+
+
+```r
+flights %&gt;% group_by(origin)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 19&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# Groups:   origin [3]&lt;/span&gt;&lt;span&gt;
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      517            515         2      830            819
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      533            529         4      850            830
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      542            540         2      923            850
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      544            545        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;004           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;022
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      554            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      812            837
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      554            558        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;      740            728
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      555            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;      913            854
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      709            723
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      838            846
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     1      558            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;      753            745
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows, and 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## summarise() with group_by()
+
+
+```r
+flights %&gt;% group_by(origin) %&gt;%
+  summarize(
+    n = n(), 
+    min_dep_delay = min(dep_delay, na.rm = TRUE), 
+    max_dep_delay = max(dep_delay, na.rm = TRUE)
+  )
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 3 x 4&lt;/span&gt;&lt;span&gt;
+##   origin      n min_dep_delay max_dep_delay
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;         &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;         &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; EWR    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;120&lt;/span&gt;&lt;span&gt;835           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;25&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;126
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt; JFK    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;111&lt;/span&gt;&lt;span&gt;279           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;43&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;301
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt; LGA    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;104&lt;/span&gt;&lt;span&gt;662           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;33&lt;/span&gt;&lt;span&gt;           911
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+
+```r
+flights %&gt;% group_by(origin, carrier) %&gt;%
+  summarize(
+    n = n(), 
+    min_dep_delay = min(dep_delay, na.rm = TRUE), 
+    max_dep_delay = max(dep_delay, na.rm = TRUE)
+  ) %&gt;%
+  filter(n &gt; 10000)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 10 x 5&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# Groups:   origin [3]&lt;/span&gt;&lt;span&gt;
+##    origin carrier     n min_dep_delay max_dep_delay
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;         &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;         &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; EWR    EV      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;43&lt;/span&gt;&lt;span&gt;939           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;25&lt;/span&gt;&lt;span&gt;           548
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; EWR    UA      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;46&lt;/span&gt;&lt;span&gt;087           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;18&lt;/span&gt;&lt;span&gt;           424
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; JFK    9E      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;14&lt;/span&gt;&lt;span&gt;651           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;24&lt;/span&gt;&lt;span&gt;           747
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; JFK    AA      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;13&lt;/span&gt;&lt;span&gt;783           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;15&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;014
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; JFK    B6      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;42&lt;/span&gt;&lt;span&gt;076           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;43&lt;/span&gt;&lt;span&gt;           453
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; JFK    DL      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;20&lt;/span&gt;&lt;span&gt;701           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;18&lt;/span&gt;&lt;span&gt;           960
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; LGA    AA      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;15&lt;/span&gt;&lt;span&gt;459           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;24&lt;/span&gt;&lt;span&gt;           803
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; LGA    DL      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;23&lt;/span&gt;&lt;span&gt;067           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;33&lt;/span&gt;&lt;span&gt;           911
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; LGA    MQ      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;16&lt;/span&gt;&lt;span&gt;928           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;26&lt;/span&gt;&lt;span&gt;           366
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; LGA    US      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;13&lt;/span&gt;&lt;span&gt;136           -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;18&lt;/span&gt;&lt;span&gt;           500
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## count()
+
+.pull-left[
+
+```r
+flights %&gt;% 
+  group_by(origin, carrier) %&gt;%
+  summarize(n = n()) %&gt;%
+  ungroup()
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 35 x 3&lt;/span&gt;&lt;span&gt;
+##    origin carrier     n
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; EWR    9E       &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;268
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; EWR    AA       &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;3&lt;/span&gt;&lt;span&gt;487
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; EWR    AS        714
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; EWR    B6       &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;6&lt;/span&gt;&lt;span&gt;557
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; EWR    DL       &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;4&lt;/span&gt;&lt;span&gt;342
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; EWR    EV      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;43&lt;/span&gt;&lt;span&gt;939
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; EWR    MQ       &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;276
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; EWR    OO          6
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; EWR    UA      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;46&lt;/span&gt;&lt;span&gt;087
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; EWR    US       &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;4&lt;/span&gt;&lt;span&gt;405
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 25 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+.pull-right[
+
+```r
+flights %&gt;% count(origin, carrier)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 35 x 3&lt;/span&gt;&lt;span&gt;
+##    origin carrier     n
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; EWR    9E       &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;268
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; EWR    AA       &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;3&lt;/span&gt;&lt;span&gt;487
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; EWR    AS        714
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; EWR    B6       &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;6&lt;/span&gt;&lt;span&gt;557
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; EWR    DL       &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;4&lt;/span&gt;&lt;span&gt;342
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; EWR    EV      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;43&lt;/span&gt;&lt;span&gt;939
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; EWR    MQ       &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;276
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; EWR    OO          6
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; EWR    UA      &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;46&lt;/span&gt;&lt;span&gt;087
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; EWR    US       &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;4&lt;/span&gt;&lt;span&gt;405
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 25 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+---
+
+## mutate() with group_by()
+
+
+```r
+flights %&gt;% group_by(origin) %&gt;%
+  mutate(
+    n = n(), 
+  ) %&gt;%
+  select(origin, n)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 336,776 x 2&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# Groups:   origin [3]&lt;/span&gt;&lt;span&gt;
+##    origin      n
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; EWR    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;120&lt;/span&gt;&lt;span&gt;835
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; LGA    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;104&lt;/span&gt;&lt;span&gt;662
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; JFK    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;111&lt;/span&gt;&lt;span&gt;279
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; JFK    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;111&lt;/span&gt;&lt;span&gt;279
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; LGA    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;104&lt;/span&gt;&lt;span&gt;662
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; EWR    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;120&lt;/span&gt;&lt;span&gt;835
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; EWR    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;120&lt;/span&gt;&lt;span&gt;835
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; LGA    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;104&lt;/span&gt;&lt;span&gt;662
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; JFK    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;111&lt;/span&gt;&lt;span&gt;279
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; LGA    &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;104&lt;/span&gt;&lt;span&gt;662
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 336,766 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## Demos
+
+1. How many flights to Los Angeles (LAX) did each of the legacy carriers (AA, UA, DL or US) have in May from JFK, and what was their average duration?
+
+&lt;br/&gt;
+
+2. What was the shortest flight out of each airport in terms of distance? In terms of duration?
+
+---
+
+## Exercise 1
+
+1. Which plane (check the tail number) flew out of each New York airport the most?
+
+&lt;br/&gt;
+
+2. Which date should you fly on if you want to have the lowest possible average departure delay? What about arrival delay?
+
+---
+class: middle
+
+.center[
+&lt;img src="imgs/hex-tidyr.png" width="50%" /&gt;
+]
+
+---
+
+## Gather
+
+&lt;img src="imgs/tidyr_gather.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+.footnote[ From [data import cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf) ]
+
+---
+
+## Spread
+
+&lt;img src="imgs/tidyr_spread.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+.footnote[ From [data import cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf) ]
+
+---
+
+## Separate
+
+&lt;img src="imgs/tidyr_separate.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+.footnote[ From [data import cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf) ]
+
+---
+
+## Unite
+
+&lt;img src="imgs/tidyr_unite.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+.footnote[ From [data import cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf) ]
+
+---
+
+## Example 1 - Grades
+
+Is the following data tidy?
+
+
+```r
+(grades = tibble(
+  name  = c("Alice", "Bob", "Carol", "Dave"),
+  hw_1   = c(19, 18, 18, 19),
+  hw_2   = c(19, 20, 20, 19),
+  hw_3   = c(18, 18, 18, 18),
+  hw_4   = c(20, 16, 17, 19),
+  exam_1 = c(89, 77, 96, 86),
+  exam_2 = c(95, 88, 99, 82)
+))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 4 x 7&lt;/span&gt;&lt;span&gt;
+##   name   hw_1  hw_2  hw_3  hw_4 exam_1 exam_2
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; Alice    19    19    18    20     89     95
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt; Bob      18    20    18    16     77     88
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt; Carol    18    20    18    17     96     99
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt; Dave     19    19    18    19     86     82
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+--
+
+How would we calculate a final score based on the following formula,
+`$$\text{score} = 0.6\,\frac{\sum\text{hw}_i}{80} + 0.4\,\frac{\sum\text{exam}_j}{200}$$`
+
+---
+
+## Semi-tidy approach
+
+
+```r
+grades %&gt;%
+  mutate(
+    hw_avg = (hw_1+hw_2+hw_3+hw_4)/4,
+    exam_avg = (exam_1+exam_2)/2
+  ) %&gt;%
+  mutate(
+    overall = 0.4*(exam_avg/100) + 0.6*(hw_avg/20)
+  )
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 4 x 10&lt;/span&gt;&lt;span&gt;
+##   name   hw_1  hw_2  hw_3  hw_4 exam_1 exam_2 hw_avg exam_avg overall
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; Alice    19    19    18    20     89     95   19       92     0.938
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt; Bob      18    20    18    16     77     88   18       82.5   0.87 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt; Carol    18    20    18    17     96     99   18.2     97.5   0.938
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt; Dave     19    19    18    19     86     82   18.8     84     0.899
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## Wide -&gt; Long (`pivot_longer`)
+
+
+```r
+tidyr::pivot_longer(grades, cols = hw_1:exam_2, 
+                    names_to = "assignment", 
+                    values_to = "score")
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 24 x 3&lt;/span&gt;&lt;span&gt;
+##    name  assignment score
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;      &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; Alice hw_1          19
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; Alice hw_2          19
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; Alice hw_3          18
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; Alice hw_4          20
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; Alice exam_1        89
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; Alice exam_2        95
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; Bob   hw_1          18
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; Bob   hw_2          20
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; Bob   hw_3          18
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; Bob   hw_4          16
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 14 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+
+```r
+tidyr::pivot_longer(grades, cols = hw_1:exam_2, 
+                    names_to = c("type", "id"), names_sep = "_", 
+                    values_to = "score")
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 24 x 4&lt;/span&gt;&lt;span&gt;
+##    name  type  id    score
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; Alice hw    1        19
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; Alice hw    2        19
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; Alice hw    3        18
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; Alice hw    4        20
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; Alice exam  1        89
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; Alice exam  2        95
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; Bob   hw    1        18
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; Bob   hw    2        20
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; Bob   hw    3        18
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; Bob   hw    4        16
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 14 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+
+
+---
+
+## Tidy approach?
+
+
+```r
+grades %&gt;%
+  tidyr::pivot_longer(
+    cols = hw_1:exam_2, 
+    names_to = c("type", "id"), names_sep = "_", 
+    values_to = "score"
+  ) %&gt;% 
+  group_by(name, type) %&gt;%
+  summarize(total = sum(score))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 8 x 3&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# Groups:   name [4]&lt;/span&gt;&lt;span&gt;
+##   name  type  total
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; Alice exam    184
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt; Alice hw       76
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt; Bob   exam    165
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt; Bob   hw       72
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;5&lt;/span&gt;&lt;span&gt; Carol exam    195
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;6&lt;/span&gt;&lt;span&gt; Carol hw       73
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;7&lt;/span&gt;&lt;span&gt; Dave  exam    168
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;8&lt;/span&gt;&lt;span&gt; Dave  hw       75
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## Long -&gt; Wide (`pivot_wider`)
+
+
+```r
+grades %&gt;%
+  tidyr::pivot_longer(
+    cols = hw_1:exam_2, 
+    names_to = c("type", "id"), names_sep = "_", 
+    values_to = "score"
+  ) %&gt;% 
+  group_by(name, type) %&gt;%
+  summarize(total = sum(score)) %&gt;%
+  tidyr::pivot_wider(
+    names_from = type, values_from = total
+  )
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 4 x 3&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# Groups:   name [4]&lt;/span&gt;&lt;span&gt;
+##   name   exam    hw
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; Alice   184    76
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt; Bob     165    72
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt; Carol   195    73
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt; Dave    168    75
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## Finishing up
+
+
+```r
+grades %&gt;%
+  tidyr::pivot_longer(
+    cols = hw_1:exam_2, 
+    names_to = c("type", "id"), names_sep = "_", 
+    values_to = "score"
+  ) %&gt;% 
+  group_by(name, type) %&gt;%
+  summarize(total = sum(score)) %&gt;%
+  tidyr::pivot_wider(
+    names_from = type, values_from = total
+  ) %&gt;%
+  mutate(
+    score = 0.6*(hw/80) + 0.4*(exam/200)
+  )
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 4 x 4&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# Groups:   name [4]&lt;/span&gt;&lt;span&gt;
+##   name   exam    hw score
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; Alice   184    76 0.938
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt; Bob     165    72 0.87 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt; Carol   195    73 0.938
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt; Dave    168    75 0.899
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
