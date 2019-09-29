@@ -28,7 +28,8 @@ schedule:
 
 - week: 3
   day: 0
-  lecture: "dplyr & Tidy data"
+  lecture: "Tidy data, dplyr, tidyr"
+  slides: Lec03
   readings:
   - text: dplyr Vignette
     link: https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html
