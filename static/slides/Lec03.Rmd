@@ -29,6 +29,300 @@ library(magrittr)
 class: middle
 count: false
 
+# Functions
+
+---
+
+## Function Parts
+
+The two parts of a function are the arguments (`formals`) and the code (`body`).
+
+```{r}
+gcd = function(long1, lat1, long2, lat2) {
+  R = 6371 # Earth mean radius in km
+  # distance in km
+  acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2) * cos(long2-long1)) * R
+}
+```
+
+--
+
+.pull-left[
+```{r}
+formals(gcd)
+```
+]
+
+.pull-right[
+```{r}
+body(gcd)
+```
+]
+
+---
+
+## Return values
+
+There are two ways of returning values in R: explicitly or implicitly.
+
+<br/>
+
+*Explicit* - includes one or more `return` statements
+
+```{r}
+f = function(x) {
+  return(x*x)
+}
+```
+
+<br/>
+
+*Implicit* - value of the last statement is returned.
+
+```{r}
+f = function(x) {
+  x*x
+}
+```
+
+---
+
+## Argument names
+
+When defining a function we are also implicitly defining names for the arguments, when calling the function we can use these names to pass arguments in a different order.
+
+
+```{r}
+f = function(x,y,z) {
+  paste0("x=",x," y=",y," z=",z)
+}
+```
+
+.pull-left[
+```{r,error=TRUE}
+f(1,2,3)
+f(z=1,x=2,y=3)
+```
+]
+
+.pull-right[
+```{r,error=TRUE}
+f(y=2,1,3)
+f(y=2,1,x=3)
+```
+]
+
+```{r,error=TRUE}
+f(1,2,3,m=1)
+```
+
+---
+
+## Argument defaults
+
+It is also possible to give function arguments default values so that they don't need to be provided every time the function is called.
+
+```{r error=TRUE}
+f = function(x,y=1,z=1) {
+  paste0("x=",x," y=",y," z=",z)
+}
+```
+
+```{r error=TRUE}
+f()
+f(x=3)
+f(y=2,2)
+```
+
+---
+
+## Return values
+
+Many of the built in functions in R will return a value, even if you haven't noticed that this is the case. This can be particularly problematic if you are using implicit return values, since you might be returning something you didn't expect.
+
+Some examples,
+
+```{r, include = FALSE}
+rm(list = ls())
+```
+
+.pull-left[
+```{r error=TRUE}
+x = y = 5
+```
+
+```{r}
+x
+y
+```
+]
+
+.pull-right[
+```{r error=TRUE}
+z = if (rnorm(1) > 0) {
+  "pos"
+} else {
+  "neg"
+}
+```
+
+```{r}
+z
+```
+]
+
+--
+
+<br/>
+
+.pull-left[
+```{r}
+y = 5
+```
+]
+
+.pull-right[
+```{r}
+if (rnorm(1) > 0) {
+  "pos"
+} else {
+  "neg"
+}
+```
+]
+
+---
+
+## More oddness
+
+```{r}
+r = rnorm(1)
+```
+
+.pull-left[
+```{r}
+if (r > 0) {
+  print("pos")
+} else {
+  print("neg")
+}
+```
+]
+
+.pull-right[
+```{r}
+z = if (r > 0) {
+  print("pos")
+} else {
+  print("neg")
+}
+z
+```
+]
+
+--
+
+<br/>
+
+```{r}
+typeof(print("ABC"))
+z = typeof(print("ABC"))
+z
+```
+
+---
+
+## Invisible values
+
+.pull-left[
+```{r}
+f = function(x) {
+  invisible(x)
+}
+```
+]
+
+.pull-right[
+```{r}
+g = function(x) {
+  x
+}
+```
+]
+
+--
+
+<br/>
+
+.pull-left[
+```{r}
+f(1)
+```
+]
+
+.pull-right[
+```{r}
+g(1)
+```
+]
+
+--
+
+<br/>
+
+.pull-left[
+```{r}
+x = f(1)
+x
+```
+]
+
+.pull-right[
+```{r}
+y = g(1)
+y
+```
+]
+
+
+---
+
+## Even Operators are functions
+
+.pull-left[
+```{r}
+`+`
+typeof(`+`)
+`+`(4:1,2)
+
+4:1 + 2
+```
+]
+
+.pull-right[
+```{r}
+`|`
+typeof(`|`)
+`|`(TRUE,FALSE)
+
+TRUE | FALSE
+```
+]
+
+--
+
+<br/>
+
+```{r}
+`$`
+`[[`
+`names<-`
+```
+
+---
+class: middle
+count: false
+
 .center[
 ```{r echo=FALSE, out.width="50%"}
 knitr::include_graphics('imgs/hex-tidyverse.png')

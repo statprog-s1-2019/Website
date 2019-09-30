@@ -25,6 +25,527 @@ exclude: true
 class: middle
 count: false
 
+# Functions
+
+---
+
+## Function Parts
+
+The two parts of a function are the arguments (`formals`) and the code (`body`).
+
+
+```r
+gcd = function(long1, lat1, long2, lat2) {
+  R = 6371 # Earth mean radius in km
+  # distance in km
+  acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2) * cos(long2-long1)) * R
+}
+```
+
+--
+
+.pull-left[
+
+```r
+formals(gcd)
+```
+
+```
+## $long1
+## 
+## 
+## $lat1
+## 
+## 
+## $long2
+## 
+## 
+## $lat2
+```
+]
+
+.pull-right[
+
+```r
+body(gcd)
+```
+
+```
+## {
+##     R = 6371
+##     acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(long2 - 
+##         long1)) * R
+## }
+```
+]
+
+---
+
+## Return values
+
+There are two ways of returning values in R: explicitly or implicitly.
+
+&lt;br/&gt;
+
+*Explicit* - includes one or more `return` statements
+
+
+```r
+f = function(x) {
+  return(x*x)
+}
+```
+
+&lt;br/&gt;
+
+*Implicit* - value of the last statement is returned.
+
+
+```r
+f = function(x) {
+  x*x
+}
+```
+
+---
+
+## Argument names
+
+When defining a function we are also implicitly defining names for the arguments, when calling the function we can use these names to pass arguments in a different order.
+
+
+
+```r
+f = function(x,y,z) {
+  paste0("x=",x," y=",y," z=",z)
+}
+```
+
+.pull-left[
+
+```r
+f(1,2,3)
+```
+
+```
+## [1] "x=1 y=2 z=3"
+```
+
+```r
+f(z=1,x=2,y=3)
+```
+
+```
+## [1] "x=2 y=3 z=1"
+```
+]
+
+.pull-right[
+
+```r
+f(y=2,1,3)
+```
+
+```
+## [1] "x=1 y=2 z=3"
+```
+
+```r
+f(y=2,1,x=3)
+```
+
+```
+## [1] "x=3 y=2 z=1"
+```
+]
+
+
+```r
+f(1,2,3,m=1)
+```
+
+```
+## Error in f(1, 2, 3, m = 1): unused argument (m = 1)
+```
+
+---
+
+## Argument defaults
+
+It is also possible to give function arguments default values so that they don't need to be provided every time the function is called.
+
+
+```r
+f = function(x,y=1,z=1) {
+  paste0("x=",x," y=",y," z=",z)
+}
+```
+
+
+```r
+f()
+```
+
+```
+## Error in paste0("x=", x, " y=", y, " z=", z): argument "x" is missing, with no default
+```
+
+```r
+f(x=3)
+```
+
+```
+## [1] "x=3 y=1 z=1"
+```
+
+```r
+f(y=2,2)
+```
+
+```
+## [1] "x=2 y=2 z=1"
+```
+
+---
+
+## Return values
+
+Many of the built in functions in R will return a value, even if you haven't noticed that this is the case. This can be particularly problematic if you are using implicit return values, since you might be returning something you didn't expect.
+
+Some examples,
+
+
+
+.pull-left[
+
+```r
+x = y = 5
+```
+
+
+```r
+x
+```
+
+```
+## [1] 5
+```
+
+```r
+y
+```
+
+```
+## [1] 5
+```
+]
+
+.pull-right[
+
+```r
+z = if (rnorm(1) &gt; 0) {
+  "pos"
+} else {
+  "neg"
+}
+```
+
+
+```r
+z
+```
+
+```
+## [1] "neg"
+```
+]
+
+--
+
+&lt;br/&gt;
+
+.pull-left[
+
+```r
+y = 5
+```
+]
+
+.pull-right[
+
+```r
+if (rnorm(1) &gt; 0) {
+  "pos"
+} else {
+  "neg"
+}
+```
+
+```
+## [1] "neg"
+```
+]
+
+---
+
+## More oddness
+
+
+```r
+r = rnorm(1)
+```
+
+.pull-left[
+
+```r
+if (r &gt; 0) {
+  print("pos")
+} else {
+  print("neg")
+}
+```
+
+```
+## [1] "pos"
+```
+]
+
+.pull-right[
+
+```r
+z = if (r &gt; 0) {
+  print("pos")
+} else {
+  print("neg")
+}
+```
+
+```
+## [1] "pos"
+```
+
+```r
+z
+```
+
+```
+## [1] "pos"
+```
+]
+
+--
+
+&lt;br/&gt;
+
+
+```r
+typeof(print("ABC"))
+```
+
+```
+## [1] "ABC"
+```
+
+```
+## [1] "character"
+```
+
+```r
+z = typeof(print("ABC"))
+```
+
+```
+## [1] "ABC"
+```
+
+```r
+z
+```
+
+```
+## [1] "character"
+```
+
+---
+
+## Invisible values
+
+.pull-left[
+
+```r
+f = function(x) {
+  invisible(x)
+}
+```
+]
+
+.pull-right[
+
+```r
+g = function(x) {
+  x
+}
+```
+]
+
+--
+
+&lt;br/&gt;
+
+.pull-left[
+
+```r
+f(1)
+```
+]
+
+.pull-right[
+
+```r
+g(1)
+```
+
+```
+## [1] 1
+```
+]
+
+--
+
+&lt;br/&gt;
+
+.pull-left[
+
+```r
+x = f(1)
+x
+```
+
+```
+## [1] 1
+```
+]
+
+.pull-right[
+
+```r
+y = g(1)
+y
+```
+
+```
+## [1] 1
+```
+]
+
+
+---
+
+## Even Operators are functions
+
+.pull-left[
+
+```r
+`+`
+```
+
+```
+## function (e1, e2)  .Primitive("+")
+```
+
+```r
+typeof(`+`)
+```
+
+```
+## [1] "builtin"
+```
+
+```r
+`+`(4:1,2)
+```
+
+```
+## [1] 6 5 4 3
+```
+
+```r
+4:1 + 2
+```
+
+```
+## [1] 6 5 4 3
+```
+]
+
+.pull-right[
+
+```r
+`|`
+```
+
+```
+## function (e1, e2)  .Primitive("|")
+```
+
+```r
+typeof(`|`)
+```
+
+```
+## [1] "builtin"
+```
+
+```r
+`|`(TRUE,FALSE)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+TRUE | FALSE
+```
+
+```
+## [1] TRUE
+```
+]
+
+--
+
+&lt;br/&gt;
+
+
+```r
+`$`
+```
+
+```
+## .Primitive("$")
+```
+
+```r
+`[[`
+```
+
+```
+## .Primitive("[[")
+```
+
+```r
+`names&lt;-`
+```
+
+```
+## function (x, value)  .Primitive("names&lt;-")
+```
+
+---
+class: middle
+count: false
+
 .center[
 &lt;img src="imgs/hex-tidyverse.png" width="50%" /&gt;
 ]
@@ -273,18 +794,18 @@ as_tibble(df)
 ```
 
 &lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 10 x 3&lt;/span&gt;&lt;span&gt;
-##         x        y     z
-##     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;8.38&lt;/span&gt;&lt;span&gt;  -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.532&lt;/span&gt;&lt;span&gt;   0.457
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2.37&lt;/span&gt;&lt;span&gt;   0.125   0.612
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  1.57  -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.199&lt;/span&gt;&lt;span&gt;   1.000
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  1.78   0.834   0.748
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.439&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1.48&lt;/span&gt;&lt;span&gt;    0.165
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.879&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.273&lt;/span&gt;&lt;span&gt;   0.977
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1.55&lt;/span&gt;&lt;span&gt;   0.260   0.530
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1.29&lt;/span&gt;&lt;span&gt;  -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.311&lt;/span&gt;&lt;span&gt;   0.939
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2.53&lt;/span&gt;&lt;span&gt;  -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.007&lt;/span&gt;&lt;span style='color: #BB0000;text-decoration: underline;'&gt;95&lt;/span&gt;&lt;span&gt; 0.713
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3.84&lt;/span&gt;&lt;span&gt;  -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.634&lt;/span&gt;&lt;span&gt;   0.521
+##         x       y      z
+##     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  6.55   1.33   0.141 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  4.90   1.25   0.193 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.832&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2.06&lt;/span&gt;&lt;span&gt;   0.202 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.366&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1.20&lt;/span&gt;&lt;span&gt;   0.209 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  8.54   1.03   0.760 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  7.37   0.895  0.161 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  6.99   0.074&lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt; 0.106 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6.32&lt;/span&gt;&lt;span&gt;   0.837  0.054&lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;0&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  1.17  -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;0.175&lt;/span&gt;&lt;span&gt;  0.897 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  2.88  -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1.56&lt;/span&gt;&lt;span&gt;   0.368
 &lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
 
 ```r
@@ -292,17 +813,17 @@ df
 ```
 
 ```
-##             x            y         z
-## 1  -8.3777858 -0.531554492 0.4572578
-## 2  -2.3655263  0.125242011 0.6118571
-## 3   1.5721331 -0.199320280 0.9999149
-## 4   1.7813048  0.833755021 0.7479874
-## 5  -0.4392690 -1.476324115 0.1651651
-## 6  -0.8792162 -0.272865204 0.9772709
-## 7  -1.5495510  0.259754561 0.5299442
-## 8  -1.2856277 -0.310655344 0.9390027
-## 9  -2.5291995 -0.007954749 0.7128745
-## 10 -3.8357677 -0.634263557 0.5212983
+##             x           y          z
+## 1   6.5549920  1.33493624 0.14133909
+## 2   4.9048986  1.25420908 0.19258004
+## 3  -0.8321325 -2.05660896 0.20240787
+## 4  -0.3662076 -1.20305498 0.20919522
+## 5   8.5427624  1.03216846 0.76031755
+## 6   7.3653457  0.89544307 0.16145765
+## 7   6.9944616  0.07407176 0.10635841
+## 8  -6.3175772  0.83708878 0.05404338
+## 9   1.1679234 -0.17484177 0.89708750
+## 10  2.8790265 -1.55645263 0.36818979
 ```
 ]
 
@@ -1289,16 +1810,16 @@ flights %&gt;% sample_n(10)
 &lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 10 x 19&lt;/span&gt;&lt;span&gt;
 ##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
 ##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     9    23     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;711           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;652        19     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;826           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;823
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     9    21     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;011           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;025       -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;14&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;315           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;325
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     2     5      852            855        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;100           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;104
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    10    24     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;001           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;006        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;210           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;213
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     2     5     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;139           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;140        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;455           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;450
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     8     8      654            700        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      927            947
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     6    25     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;800           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;640        80     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;908           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;813
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    10     1     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;936           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;940        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;117           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;125
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    12    18     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;111           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;115        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;309           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;315
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     2    10      844            845        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;1&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;410           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;350
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1    24     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;830           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;835        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;954           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;950
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     6     7     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;228           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;200        28     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;352           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;313
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     8     8     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;841           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;822        19      126           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;155
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    11    17     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;249           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;715       334      128           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;015
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     2    12     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;056           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;045        11     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;342           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;309
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    12    23      710            715        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;      947            940
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     6     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;150           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;135        15     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;450           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;449
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3    28     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;128           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;130        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;328           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;339
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     7    19      627            630        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      743            747
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    11    16     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;456           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;455         1     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;933           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;949
 ## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
 ## #   tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
 ## #   hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
@@ -1311,16 +1832,16 @@ flights %&gt;% sample_frac(0.00003)
 &lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 10 x 19&lt;/span&gt;&lt;span&gt;
 ##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
 ##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1    15     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;500           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;504        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;4&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;641           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;640
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     2    23      558            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;      653            705
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     5    17     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;258           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;300        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;2&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;445           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;435
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     2    19     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;016           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;825       111     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;217           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;030
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    10     2      734            740        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;6&lt;/span&gt;&lt;span&gt;      850            900
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     8    29     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;025           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;014        11     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;223           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;208
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     8    13      934            900        34     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;211           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;126
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    11     2      557            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;      833            829
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    12    20     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;310           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;315        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;608           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;620
-## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1    17      811            803         8      922            918
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     5    29     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;230           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;235        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;521           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;540
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     9     1      555            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;      835            851
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    10    29     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;806           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;803         3     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;042           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;056
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013    12     9      801            800         1     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;151           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;135
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     3     4     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;636           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;600        36     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;845           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;835
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     5    28     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;302           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;305        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;3&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;448           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;455
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     1     3      914            900        14     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;504           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;530
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     9     8      701            710        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;9&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;002           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;025
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     8    23      555            600        -&lt;/span&gt;&lt;span style='color: #BB0000;'&gt;5&lt;/span&gt;&lt;span&gt;      644            656
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;2&lt;/span&gt;&lt;span&gt;013     7    20     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;050           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;041         9     &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;214           &lt;/span&gt;&lt;span style='text-decoration: underline;'&gt;1&lt;/span&gt;&lt;span&gt;157
 ## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 11 more variables: arr_delay &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, carrier &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, flight &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
 ## #   tailnum &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, origin &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, dest &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, air_time &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, distance &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
 ## #   hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, minute &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, time_hour &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dttm&amp;gt;&lt;/span&gt;&lt;span&gt;
