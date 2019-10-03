@@ -24,11 +24,11 @@ schedule:
     link: http://adv-r.had.co.nz/OO-essentials.html#s3
   - text: Adv-R - Subsetting
     link: http://adv-r.had.co.nz/Subsetting.html
-  notes: "HW1 out"
+  notes: "<a href='https://github.com/statprog-s1-2019/hw1'>HW1 out</a> - due Fri Oct 4th, 11:59 pm"
 
 - week: 3
   day: 0
-  lecture: "Tidy data, dplyr, tidyr"
+  lecture: "Tidy data, dplyr"
   slides: Lec03
   readings:
   - text: dplyr Vignette
@@ -39,11 +39,11 @@ schedule:
     link: https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf
   - text: data import cheatsheet
     link: https://github.com/rstudio/cheatsheets/blob/master/data-import.pdf
-  notes: "HW2 out"
+  notes: "<a href='https://github.com/statprog-s1-2019/hw2'>HW2 out</a> - due Fri Oct 18th, 11:59pm,"
 
 - week: 4
   day: 0
-  lecture: "purrr"
+  lecture: "purrr & tidyr"
   readings:
   - text: Purrr tutorial
     link: https://jennybc.github.io/purrr-tutorial/index.html
