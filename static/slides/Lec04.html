@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>tidyr and purrr</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Colin Rundel" />
+    <meta name="date" content="2019-10-07" />
+    <link rel="stylesheet" href="slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# tidyr and purrr
+### Colin Rundel
+### 2019-10-07
+
+---
+
+exclude: true
+
+
+
+
+---
+class: middle
+
+.center[
+&lt;img src="imgs/hex-tidyr.png" width="50%" /&gt;
+]
+
+---
+
+## Example - Grades
+
+Is the following data tidy?
+
+
+```r
+(grades = tibble(
+  name  = c("Alice", "Bob", "Carol", "Dave"),
+  hw_1   = c(19, 18, 18, 19),
+  hw_2   = c(19, 20, 20, 19),
+  hw_3   = c(18, 18, 18, 18),
+  hw_4   = c(20, 16, 17, 19),
+  exam_1 = c(89, 77, 96, 86),
+  exam_2 = c(95, 88, 99, 82)
+))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 4 x 7&lt;/span&gt;&lt;span&gt;
+##   name   hw_1  hw_2  hw_3  hw_4 exam_1 exam_2
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; Alice    19    19    18    20     89     95
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt; Bob      18    20    18    16     77     88
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt; Carol    18    20    18    17     96     99
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt; Dave     19    19    18    19     86     82
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+--
+
+&lt;br/&gt;&lt;br/&gt;
+
+.center[
+This is an example of *wide* data, which is almost never *tidy*.
+]
+
+---
+
+## Updating `tidyr`
+
+The current version of tidyr installed in Noteable is slightly out of date (v0.8.3 vs v1.0.0). To fix this run the following,
+
+
+```r
+lib = Sys.getenv("R_LIBS_USER")
+dir.create(lib, recursive=TRUE, showWarnings=FALSE)
+install.packages("tidyr", lib=lib)
+```
+
+&lt;img src="imgs/tidyr_update.png" width="66%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+## Wider &lt;-&gt; Longer
+
+&lt;img src="imgs/tidyr_longer-wider.gif" width="66%" style="display: block; margin: auto;" /&gt;
+
+.footnote[ From Mara Averick's [tidyexplain](https://github.com/batpigandme/tidyexplain/tree/pivot) repo]
+
+---
+
+## `pivot_longer`
+
+
+
+
+```r
+pivot_longer(table, cols = -country, names_to = "year", values_to = "cases")
+```
+
+&lt;img src="imgs/tidyr_gather.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+
+## `pivot_wider`
+
+
+
+
+```r
+pivot_wider(table, id_cols = country:year, names_from = type, values_from = count)
+```
+
+&lt;img src="imgs/tidyr_spread.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+## Separate
+
+
+```r
+separate(table, col = rate, sep = "/", into = c("cases", "pop"))
+```
+
+&lt;img src="imgs/tidyr_separate.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Unite
+
+
+```r
+unite(table, century, year, col = "year", sep = "")
+```
+
+&lt;img src="imgs/tidyr_unite.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Example 1 - Summarizing Grades
+
+Is the following data tidy?
+
+
+```r
+(grades = tibble(
+  name  = c("Alice", "Bob", "Carol", "Dave"),
+  hw_1   = c(19, 18, 18, 19),
+  hw_2   = c(19, 20, 20, 19),
+  hw_3   = c(18, 18, 18, 18),
+  hw_4   = c(20, 16, 17, 19),
+  exam_1 = c(89, 77, 96, 86),
+  exam_2 = c(95, 88, 99, 82)
+))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 4 x 7&lt;/span&gt;&lt;span&gt;
+##   name   hw_1  hw_2  hw_3  hw_4 exam_1 exam_2
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; Alice    19    19    18    20     89     95
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt; Bob      18    20    18    16     77     88
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt; Carol    18    20    18    17     96     99
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt; Dave     19    19    18    19     86     82
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+--
+
+How would we calculate a final score based on the following formula,
+`$$\text{score} = 0.6\,\frac{\sum\text{hw}_i}{80} + 0.4\,\frac{\sum\text{exam}_j}{200}$$`
+
+---
+
+## Semi-tidy approach
+
+
+```r
+grades %&gt;%
+  mutate(
+    hw_avg = (hw_1+hw_2+hw_3+hw_4)/4,
+    exam_avg = (exam_1+exam_2)/2
+  ) %&gt;%
+  mutate(
+    overall = 0.4*(exam_avg/100) + 0.6*(hw_avg/20)
+  )
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 4 x 10&lt;/span&gt;&lt;span&gt;
+##   name   hw_1  hw_2  hw_3  hw_4 exam_1 exam_2 hw_avg exam_avg overall
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; Alice    19    19    18    20     89     95   19       92     0.938
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt; Bob      18    20    18    16     77     88   18       82.5   0.87 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt; Carol    18    20    18    17     96     99   18.2     97.5   0.938
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt; Dave     19    19    18    19     86     82   18.8     84     0.899
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+--
+
+&lt;br/&gt;&lt;br/&gt;
+
+.center[
+What is problematic about this approach?
+]
+
+---
+
+## Wide -&gt; Long (`pivot_longer`)
+
+
+```r
+tidyr::pivot_longer(grades, cols = hw_1:exam_2, 
+                    names_to = "assignment", 
+                    values_to = "score")
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 24 x 3&lt;/span&gt;&lt;span&gt;
+##    name  assignment score
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;      &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; Alice hw_1          19
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; Alice hw_2          19
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; Alice hw_3          18
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; Alice hw_4          20
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; Alice exam_1        89
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; Alice exam_2        95
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; Bob   hw_1          18
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; Bob   hw_2          20
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; Bob   hw_3          18
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; Bob   hw_4          16
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 14 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+
+```r
+tidyr::pivot_longer(grades, cols = hw_1:exam_2, 
+                    names_to = c("type", "id"), names_sep = "_", 
+                    values_to = "score")
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 24 x 4&lt;/span&gt;&lt;span&gt;
+##    name  type  id    score
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; Alice hw    1        19
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; Alice hw    2        19
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; Alice hw    3        18
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; Alice hw    4        20
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; Alice exam  1        89
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; Alice exam  2        95
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; Bob   hw    1        18
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; Bob   hw    2        20
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; Bob   hw    3        18
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; Bob   hw    4        16
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 14 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+
+
+---
+
+## Tidy approach?
+
+
+```r
+grades %&gt;%
+  tidyr::pivot_longer(
+    cols = hw_1:exam_2, 
+    names_to = c("type", "id"), names_sep = "_", 
+    values_to = "score"
+  ) %&gt;% 
+  group_by(name, type) %&gt;%
+  summarize(total = sum(score))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 8 x 3&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# Groups:   name [4]&lt;/span&gt;&lt;span&gt;
+##   name  type  total
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; Alice exam    184
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt; Alice hw       76
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt; Bob   exam    165
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt; Bob   hw       72
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;5&lt;/span&gt;&lt;span&gt; Carol exam    195
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;6&lt;/span&gt;&lt;span&gt; Carol hw       73
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;7&lt;/span&gt;&lt;span&gt; Dave  exam    168
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;8&lt;/span&gt;&lt;span&gt; Dave  hw       75
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## Long -&gt; Wide (`pivot_wider`)
+
+
+```r
+grades %&gt;%
+  tidyr::pivot_longer(
+    cols = hw_1:exam_2, 
+    names_to = c("type", "id"), names_sep = "_", 
+    values_to = "score"
+  ) %&gt;% 
+  group_by(name, type) %&gt;%
+  summarize(total = sum(score)) %&gt;%
+  tidyr::pivot_wider(
+    names_from = type, values_from = total
+  )
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 4 x 3&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# Groups:   name [4]&lt;/span&gt;&lt;span&gt;
+##   name   exam    hw
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; Alice   184    76
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt; Bob     165    72
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt; Carol   195    73
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt; Dave    168    75
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+## Finishing up
+
+
+```r
+grades %&gt;%
+  tidyr::pivot_longer(
+    cols = hw_1:exam_2, 
+    names_to = c("type", "id"), names_sep = "_", 
+    values_to = "score"
+  ) %&gt;% 
+  group_by(name, type) %&gt;%
+  summarize(total = sum(score)) %&gt;%
+  tidyr::pivot_wider(
+    names_from = type, values_from = total
+  ) %&gt;%
+  mutate(
+    score = 0.6*(hw/80) + 0.4*(exam/200)
+  )
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 4 x 4&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# Groups:   name [4]&lt;/span&gt;&lt;span&gt;
+##   name   exam    hw score
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;dbl&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt; Alice   184    76 0.938
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt; Bob     165    72 0.87 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;3&lt;/span&gt;&lt;span&gt; Carol   195    73 0.938
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;4&lt;/span&gt;&lt;span&gt; Dave    168    75 0.899
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+
+
+
+---
+class: middle
+count: false
+
+# Functional Programming
+
+---
+class: middle
+count: false
+
+# Apply functions
+
+---
+
+## Apply functions
+
+The apply functions are a collection of tools for functional programming in R, they are variations of the `map` function found in many other languages
+
+
+```r
+??apply
+---
+
+## 
+## Help files with alias or concept or title matching ‘apply’ using fuzzy
+## matching:
+## 
+## base::apply             Apply Functions Over Array Margins
+## base::.subset           Internal Objects in Package 'base'
+## base::by                Apply a Function to a Data Frame Split by Factors
+## base::eapply            Apply a Function Over Values in an Environment
+## base::lapply            Apply a Function over a List or Vector
+## base::mapply            Apply a Function to Multiple List or Vector Arguments
+## base::rapply            Recursively Apply a Function to a List
+## base::tapply            Apply a Function Over a Ragged Array
+```
+
+---
+
+## lapply
+
+Usage: `lapply(X, FUN, ...)`
+
+`lapply` returns a list of the same length as `X`, each element of which is the result of applying `FUN` to the corresponding element of `X`.
+
+&lt;br/&gt;
+
+.pull-left[
+
+```r
+lapply(1:8, sqrt) %&gt;% str()
+```
+
+```
+## List of 8
+##  $ : num 1
+##  $ : num 1.41
+##  $ : num 1.73
+##  $ : num 2
+##  $ : num 2.24
+##  $ : num 2.45
+##  $ : num 2.65
+##  $ : num 2.83
+```
+]
+
+.pull-right[
+
+```r
+lapply(1:8, function(x) (x+1)^2) %&gt;% str()
+```
+
+```
+## List of 8
+##  $ : num 4
+##  $ : num 9
+##  $ : num 16
+##  $ : num 25
+##  $ : num 36
+##  $ : num 49
+##  $ : num 64
+##  $ : num 81
+```
+]
+
+---
+
+
+```r
+lapply(1:8, function(x, pow) x^pow, pow=3) %&gt;% str()
+```
+
+```
+## List of 8
+##  $ : num 1
+##  $ : num 8
+##  $ : num 27
+##  $ : num 64
+##  $ : num 125
+##  $ : num 216
+##  $ : num 343
+##  $ : num 512
+```
+
+```r
+lapply(1:8, function(x, pow) x^pow, x=2) %&gt;% str()
+```
+
+```
+## List of 8
+##  $ : num 2
+##  $ : num 4
+##  $ : num 8
+##  $ : num 16
+##  $ : num 32
+##  $ : num 64
+##  $ : num 128
+##  $ : num 256
+```
+
+---
+
+## sapply
+
+Usage: `sapply(X, FUN, ..., simplify = TRUE, USE.NAMES = TRUE)`
+
+`sapply` is a *user-friendly* version and wrapper of `lapply`, it is a *simplifying* version of lapply. Whenever possible it will return a vector, matrix, or an array.
+
+&lt;br/&gt;
+
+
+```r
+sapply(1:8, sqrt)
+```
+
+```
+## [1] 1.000000 1.414214 1.732051 2.000000 2.236068 2.449490 2.645751 2.828427
+```
+
+```r
+sapply(1:8, function(x) (x+1)^2)
+```
+
+```
+## [1]  4  9 16 25 36 49 64 81
+```
+
+---
+
+
+```r
+sapply(1:8, function(x) c(x, x^2, x^3, x^4))
+```
+
+```
+##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
+## [1,]    1    2    3    4    5    6    7    8
+## [2,]    1    4    9   16   25   36   49   64
+## [3,]    1    8   27   64  125  216  343  512
+## [4,]    1   16   81  256  625 1296 2401 4096
+```
+
+```r
+sapply(1:8, function(x) list(x, x^2, x^3, x^4))
+```
+
+```
+##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
+## [1,] 1    2    3    4    5    6    7    8   
+## [2,] 1    4    9    16   25   36   49   64  
+## [3,] 1    8    27   64   125  216  343  512 
+## [4,] 1    16   81   256  625  1296 2401 4096
+```
+
+---
+
+
+```r
+sapply(2:6, seq)
+```
+
+```
+## [[1]]
+## [1] 1 2
+## 
+## [[2]]
+## [1] 1 2 3
+## 
+## [[3]]
+## [1] 1 2 3 4
+## 
+## [[4]]
+## [1] 1 2 3 4 5
+## 
+## [[5]]
+## [1] 1 2 3 4 5 6
+```
+
+---
+
+## [ls]apply and data frames
+
+We can use these functions with data frames, the key is to remember that a data frame is just a fancy list.
+
+
+```r
+df = data.frame(a = 1:6, b = letters[1:6], c = c(TRUE,FALSE))
+lapply(df, class) %&gt;% str()
+```
+
+```
+## List of 3
+##  $ a: chr "integer"
+##  $ b: chr "factor"
+##  $ c: chr "logical"
+```
+
+```r
+sapply(df, class)
+```
+
+```
+##         a         b         c 
+## "integer"  "factor" "logical"
+```
+
+---
+
+## other less common applies
+
+* `apply(X, MARGIN, FUN, ...)` - applies a function over the rows or columns of a data frame, matrix or array
+
+* `vapply(X, FUN, FUN.VALUE, ..., USE.NAMES = TRUE)` - is similar to `sapply`, but has a enforced return type and size
+
+* `mapply(FUN, ..., MoreArgs = NULL, SIMPLIFY = TRUE, USE.NAMES = TRUE)` -  like `sapply` but will iterate over multiple vectors at the same time.
+
+* `rapply(object, f, classes = "ANY", deflt = NULL, how = c("unlist", "replace", "list"), ...)` - a recursive version of `lapply`, behavior depends largely on the `how` argument
+
+* `eapply(env, FUN, ..., all.names = FALSE, USE.NAMES = TRUE)` -  apply a function over an environment.
+
+---
+
+## Exercise 1
+
+Using the `sw_people` data set in the `repurrrsive` package, extract the names of all of the characters using:
+
+* a for loop
+
+* one of the apply functions
+
+
+Start by examining the structure of the data using RStudio's viewer,
+
+```r
+library(repurrrsive)
+View(sw_people)
+```
+
+---
+class: middle
+
+.center[
+&lt;img src="imgs/hex-purrr.png" width="50%" /&gt;
+]
+
+---
+
+## Map functions
+
+Basic functions for looping over an object and returning a value (of a specific type) - replacement for `lapply`/`sapply`/`vapply`.
+
+* `map()` - returns a list.
+
+* `map_lgl()` - returns a logical vector.
+
+* `map_int()` - returns a integer vector.
+
+* `map_dbl()` - returns a double vector.
+
+* `map_chr()` - returns a character vector.
+
+* `map_dfr()` - returns a data frame by row binding.
+
+* `map_dfc()` - returns a data frame by column binding.
+
+* `walk()` - returns nothing, call function exclusively for its side effects
+
+
+---
+
+## Type Consistency
+
+R is a weakly / dynamically typed language which means there is no simple way to define a function which enforces the argument or return types. This flexibility can be useful at times, but often it makes it hard to reason about your code and requires more verbose code to handle edge cases.
+
+
+```r
+x = list(rnorm(1e3),rnorm(1e3),rnorm(1e3))
+```
+
+```r
+map_dbl(x, mean)
+```
+
+```
+## [1] -0.03990658 -0.01343285 -0.00251319
+```
+
+```r
+map_chr(x, mean)
+```
+
+```
+## [1] "-0.039907" "-0.013433" "-0.002513"
+```
+
+```r
+map_int(x, mean)
+```
+
+```
+## Error: Can't coerce element 1 from a double to a integer
+```
+
+---
+
+## Shortcut - Anonymous Functions
+
+An anonymous function is one that is never given a name (assigned to a variable)
+
+
+```r
+sapply(1:5, function(x) x^(x+1))
+```
+
+```
+## [1]     1     8    81  1024 15625
+```
+
+purrr lets us write anonymous functions using one sided formulas where the argument is given by `.` or `.x` for `map` and related functions.
+
+
+```r
+map_dbl(1:5, ~ .^(.+1))
+```
+
+```
+## [1]     1     8    81  1024 15625
+```
+
+
+```r
+map_dbl(1:5, ~ .x^(.x+1))
+```
+
+```
+## [1]     1     8    81  1024 15625
+```
+
+---
+
+## Shortcut - Anonymous Functions - `map2`
+
+Functions with the `map2` prefix work the same as the `map` functions but they iterate over two objects instead of one. Arguments in an anonymous function are instead given by `.x` and `.y` (or `..1` and `..2`) respectively.
+
+
+```r
+map2_dbl(1:5, 1:5, ~ .x^(.y+1))
+```
+
+```
+## [1]     1     8    81  1024 15625
+```
+
+```r
+map2_dbl(1:5, 1:5, ~ ..1^(..2+1))
+```
+
+```
+## [1]     1     8    81  1024 15625
+```
+
+```r
+map2_chr(letters[1:5], LETTERS[1:5], paste0)
+```
+
+```
+## [1] "aA" "bB" "cC" "dD" "eE"
+```
+
+---
+
+## Purrr shortcut - Lookups
+
+Very often we want to extract only certain (named) values from a list, `purrr` provides a shortcut for this operation when you provide either a character or numeric value instead of a function to apply.
+
+
+
+```r
+x = list(list(a=1L,b=2L,c=list(d=3L,e=4L)),
+         list(a=5L,b=6L,c=list(d=7L,e=8L,f=9L)))
+```
+
+--
+
+.pull-left[
+
+```r
+map_int(x, "a")
+```
+
+```
+## [1] 1 5
+```
+
+```r
+map_dbl(x, c("c","e"))
+```
+
+```
+## [1] 4 8
+```
+
+```r
+map_chr(x, list(3,"d"))
+```
+
+```
+## [1] "3" "7"
+```
+]
+
+--
+
+.pull-right[
+
+```r
+map_df(x, 3)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 2 x 3&lt;/span&gt;&lt;span&gt;
+##       d     e     f
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt;     3     4    &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;2&lt;/span&gt;&lt;span&gt;     7     8     9
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+```r
+map_dfc(x, 3)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 1 x 5&lt;/span&gt;&lt;span&gt;
+##       d     e    d1    e1     f
+##   &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;1&lt;/span&gt;&lt;span&gt;     3     4     7     8     9
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+
+---
+
+
+```r
+x = list(list(a=1L,b=2L,c=list(d=3L,e=4L)),
+         list(a=5L,b=6L,c=list(d=7L,e=8L,f=9L)))
+```
+
+
+```r
+map(x, list(3,"f"))
+```
+
+```
+## [[1]]
+## NULL
+## 
+## [[2]]
+## [1] 9
+```
+
+```r
+map_int(x, list(3,"f"))
+```
+
+```
+## Result 1 must be a single integer, not NULL of length 0
+```
+
+```r
+map_int(x, list(3,"f"), .default=NA)
+```
+
+```
+## [1] NA  9
+```
+
+---
+
+## Exercise 2
+
+Using the `sw_people` data set again, generate a tidy data frame (tibble) containing as many details as possible.
+
+---
+
+## list columns
+
+
+```r
+d = tibble(
+  name = purrr::map_chr(sw_people, "name"),
+  starships = purrr::map(sw_people, "starships")
+)
+
+d
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 87 x 2&lt;/span&gt;&lt;span&gt;
+##    name               starships
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;              &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;list&amp;gt;&lt;/span&gt;&lt;span&gt;   
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; Luke Skywalker     &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [2]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; C-3PO              &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;NULL&amp;gt;&lt;/span&gt;&lt;span&gt;   
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; R2-D2              &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;NULL&amp;gt;&lt;/span&gt;&lt;span&gt;   
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; Darth Vader        &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; Leia Organa        &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;NULL&amp;gt;&lt;/span&gt;&lt;span&gt;   
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; Owen Lars          &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;NULL&amp;gt;&lt;/span&gt;&lt;span&gt;   
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; Beru Whitesun lars &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;NULL&amp;gt;&lt;/span&gt;&lt;span&gt;   
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; R5-D4              &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;NULL&amp;gt;&lt;/span&gt;&lt;span&gt;   
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; Biggs Darklighter  &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; Obi-Wan Kenobi     &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [5]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 77 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+
+```r
+d %&gt;%
+  mutate(
+    n_starships = purrr::map_int(starships, length)
+  )
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 87 x 3&lt;/span&gt;&lt;span&gt;
+##    name               starships n_starships
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;              &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;list&amp;gt;&lt;/span&gt;&lt;span&gt;          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; Luke Skywalker     &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [2]&amp;gt;&lt;/span&gt;&lt;span&gt;           2
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; C-3PO              &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;NULL&amp;gt;&lt;/span&gt;&lt;span&gt;              0
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; R2-D2              &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;NULL&amp;gt;&lt;/span&gt;&lt;span&gt;              0
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; Darth Vader        &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt;           1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; Leia Organa        &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;NULL&amp;gt;&lt;/span&gt;&lt;span&gt;              0
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; Owen Lars          &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;NULL&amp;gt;&lt;/span&gt;&lt;span&gt;              0
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; Beru Whitesun lars &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;NULL&amp;gt;&lt;/span&gt;&lt;span&gt;              0
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; R5-D4              &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;NULL&amp;gt;&lt;/span&gt;&lt;span&gt;              0
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; Biggs Darklighter  &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt;           1
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; Obi-Wan Kenobi     &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [5]&amp;gt;&lt;/span&gt;&lt;span&gt;           5
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 77 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+class: middle
+
+.center[
+&lt;img src="imgs/hex-tidyr.png" width="25%" /&gt;
+ and 
+&lt;img src="imgs/hex-purrr.png" width="25%" /&gt;
+]
+
+---
+
+## Tidy data from nested lists
+
+The recent version of `tidyr` have added several functions that are designed to aide in the tidying of heirachical data. Since they are part of `tidyr` all of the following functions work with data frames.
+
+From `tidyr`
+
+&gt; `hoist()`, `unnest_longer()`, and `unnest_wider()` provide tools for rectangling, collapsing deeply nested lists into regular columns.
+
+---
+
+
+```r
+(d = tibble(people=sw_people))
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 87 x 1&lt;/span&gt;&lt;span&gt;
+##    people           
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;list&amp;gt;&lt;/span&gt;&lt;span&gt;           
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [16]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [14]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [14]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [15]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [15]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [14]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [14]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [14]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [15]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [16]&amp;gt;&lt;/span&gt;&lt;span&gt;
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 77 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+--
+
+
+```r
+unnest_wider(d, people)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 87 x 16&lt;/span&gt;&lt;span&gt;
+##    name  height mass  hair_color skin_color eye_color birth_year gender
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;      &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;      &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;     &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;      &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; Luke… 172    77    blond      fair       blue      19BBY      male  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; C-3PO 167    75    n/a        gold       yellow    112BBY     n/a   
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; R2-D2 96     32    n/a        white, bl… red       33BBY      n/a   
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; Dart… 202    136   none       white      yellow    41.9BBY    male  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; Leia… 150    49    brown      light      brown     19BBY      female
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; Owen… 178    120   brown, gr… light      blue      52BBY      male  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; Beru… 165    75    brown      light      blue      47BBY      female
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; R5-D4 97     32    n/a        white, red red       unknown    n/a   
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; Bigg… 183    84    black      light      brown     24BBY      male  
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; Obi-… 182    77    auburn, w… fair       blue-gray 57BBY      male  
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 77 more rows, and 8 more variables: homeworld &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, films &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;list&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   species &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, vehicles &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;list&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, starships &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;list&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, created &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;,
+## #   edited &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span style='color: #949494;'&gt;, url &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+
+```r
+unnest_longer(d, people)
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 1,244 x 2&lt;/span&gt;&lt;span&gt;
+##    people    people_id 
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;list&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;     
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt; name      
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt; height    
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt; mass      
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt; hair_color
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt; skin_color
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt; eye_color 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt; birth_year
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt; gender    
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [1]&amp;gt;&lt;/span&gt;&lt;span&gt; homeworld 
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;chr [5]&amp;gt;&lt;/span&gt;&lt;span&gt; films     
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 1,234 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+
+```r
+unnest_wider(d, people) %&gt;% 
+  select(name, starships) %&gt;%
+  unnest_longer(starships, )
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 98 x 2&lt;/span&gt;&lt;span&gt;
+##    name               starships                        
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;              &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;                            
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; Luke Skywalker     http://swapi.co/api/starships/12/
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; Luke Skywalker     http://swapi.co/api/starships/22/
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; C-3PO              &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;                               
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; R2-D2              &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;                               
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; Darth Vader        http://swapi.co/api/starships/13/
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; Leia Organa        &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;                               
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; Owen Lars          &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;                               
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; Beru Whitesun lars &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;                               
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; R5-D4              &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;                               
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; Biggs Darklighter  http://swapi.co/api/starships/12/
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 88 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+
+
+```r
+tibble(people = sw_people) %&gt;%
+  hoist(
+    people,
+    name = "name",
+    height = "height",
+    mass = "mass",
+    primary_starship = list("starships", 1)
+  )
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;## &lt;span style='color: #949494;'&gt;# A tibble: 87 x 5&lt;/span&gt;&lt;span&gt;
+##    name              height mass  primary_starship               people         
+##    &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;             &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;                          &lt;/span&gt;&lt;span style='color: #949494;font-style: italic;'&gt;&amp;lt;list&amp;gt;&lt;/span&gt;&lt;span&gt;         
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 1&lt;/span&gt;&lt;span&gt; Luke Skywalker    172    77    http://swapi.co/api/starships… &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [1&lt;/span&gt;&lt;span&gt;…
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 2&lt;/span&gt;&lt;span&gt; C-3PO             167    75    &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;                             &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [1&lt;/span&gt;&lt;span&gt;…
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 3&lt;/span&gt;&lt;span&gt; R2-D2             96     32    &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;                             &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [1&lt;/span&gt;&lt;span&gt;…
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 4&lt;/span&gt;&lt;span&gt; Darth Vader       202    136   http://swapi.co/api/starships… &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [1&lt;/span&gt;&lt;span&gt;…
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 5&lt;/span&gt;&lt;span&gt; Leia Organa       150    49    &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;                             &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [1&lt;/span&gt;&lt;span&gt;…
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 6&lt;/span&gt;&lt;span&gt; Owen Lars         178    120   &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;                             &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [1&lt;/span&gt;&lt;span&gt;…
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 7&lt;/span&gt;&lt;span&gt; Beru Whitesun la… 165    75    &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;                             &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [1&lt;/span&gt;&lt;span&gt;…
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 8&lt;/span&gt;&lt;span&gt; R5-D4             97     32    &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;                             &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [1&lt;/span&gt;&lt;span&gt;…
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt; 9&lt;/span&gt;&lt;span&gt; Biggs Darklighter 183    84    http://swapi.co/api/starships… &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [1&lt;/span&gt;&lt;span&gt;…
+## &lt;/span&gt;&lt;span style='color: #BCBCBC;'&gt;10&lt;/span&gt;&lt;span&gt; Obi-Wan Kenobi    182    77    http://swapi.co/api/starships… &lt;/span&gt;&lt;span style='color: #949494;'&gt;&amp;lt;named list [1&lt;/span&gt;&lt;span&gt;…
+## &lt;/span&gt;&lt;span style='color: #949494;'&gt;# … with 77 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+
+---
+class: middle
+count: false
+
+# Acknowledgments
+
+---
+
+## Acknowledgments
+
+Above materials are derived in part from the following sources:
+
+* Hadley Wickham - [Adv-R Functionals](http://adv-r.had.co.nz/Functionals.html)
+
+* Hadley Wickham - [R for Data Science](http://r4ds.had.co.nz/)
+
+* Neil Saunders - [A brief introduction to "apply" in R](http://nsaunders.wordpress.com/2010/08/20/a-brief-introduction-to-apply-in-r/)
+
+* Jenny Bryan - [Purrr Tutorial](https://jennybc.github.io/purrr-tutorial/)
+
+* [R Language Definition](http://stat.ethz.ch/R-manual/R-devel/doc/manual/R-lang.html)
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

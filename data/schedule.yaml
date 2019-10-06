@@ -44,6 +44,7 @@ schedule:
 - week: 4
   day: 0
   lecture: "purrr & tidyr"
+  slides: Lec04
   readings:
   - text: Purrr tutorial
     link: https://jennybc.github.io/purrr-tutorial/index.html
