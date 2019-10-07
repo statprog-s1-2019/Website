@@ -95,6 +95,12 @@ knitr::include_graphics("imgs/tidyr_longer-wider.gif")
 
 ---
 
+```{r fig.align="center", out.width="100%", echo=FALSE}
+knitr::include_graphics("imgs/tidyr_longer_wider2.png")
+```
+
+---
+
 ## `pivot_longer`
 
 ```{r include=FALSE}
