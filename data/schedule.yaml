@@ -32,7 +32,7 @@ schedule:
   slides: Lec03
   readings:
   - text: dplyr Vignette
-    link: https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html
+    link: https://dplyr.tidyverse.org/articles/dplyr.html
   - text: R4DS - tidy data
     link: http://r4ds.had.co.nz/tidy-data.html
   - text: Data transformation cheatsheet
