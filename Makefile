@@ -31,4 +31,6 @@ static/slides/%.html: static/slides/%.Rmd
 	@Rscript -e "rmarkdown::render('$<')"
 	
 static/slides/%.pdf: static/slides/%.html
-	`npm  bin`/decktape remark $< $@ --chrome-arg=--disable-web-security
+	#`npm  bin`/decktape remark $< $@ --chrome-arg=--disable-web-security
+	@cd static/slides/; \
+		Rscript -e "pagedown::chrome_print('$(<F)')"
