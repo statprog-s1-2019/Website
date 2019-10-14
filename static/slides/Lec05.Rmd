@@ -114,7 +114,7 @@ ggplot(data = diamonds, aes(x = carat, y = price)) +
 ```
 
 .midi[
-- Which data is used as an input?
+- Which data are used as an input?
 - Are the variables statistically transformed before plotting?
 - What geometric objects are used to represent the data?
 - What variables are mapped onto which aesthetic attributes?
@@ -159,7 +159,7 @@ ggplot(data = diamonds, aes(x = carat, y = sqrt(price), color = color)) +
 ```
 
 .midi[
-- Which data is used as an input?
+- Which data are used as an input?
 - Are the variables statistically transformed before plotting?
 - What geometric objects are used to represent the data?
 - What variables are mapped onto which aesthetic attributes?
@@ -177,6 +177,30 @@ ggplot(data = diamonds, aes(x = carat, y = sqrt(price), color = color)) +
 
 ## Example 3
 
+```{r echo=FALSE, fig.height=5, fig.width=7}
+ggplot(data = diamonds, aes(x = carat, y = sqrt(price), color = table)) +
+  geom_point()
+```
+
+.midi[
+- Which data are used as an input?
+- Are the variables statistically transformed before plotting?
+- What geometric objects are used to represent the data?
+- What variables are mapped onto which aesthetic attributes?
+- What type of scales are used to map data to aesthetics?
+]
+
+---
+
+```{r, fig.height=5, fig.width=7}
+ggplot(data = diamonds, aes(x = carat, y = sqrt(price), color = table)) +
+  geom_point()
+```
+
+---
+
+## Example 4
+
 ```{r echo=FALSE, fig.height=5, fig.width=10}
 ggplot(data = diamonds, aes(x = cut, y = price, fill = color)) +
   geom_boxplot() +
@@ -184,7 +208,7 @@ ggplot(data = diamonds, aes(x = cut, y = price, fill = color)) +
 ```
 
 .midi[
-- Which data is used as an input?
+- Which data are used as an input?
 - Are the variables statistically transformed before plotting?
 - What geometric objects are used to represent the data?
 - What variables are mapped onto which aesthetic attributes?
@@ -209,7 +233,7 @@ ggplot(data = diamonds, aes(x = cut, y = log(price,10), fill = color)) +
 
 ---
 
-## Example 4
+## Example 5
 
 ```{r echo=FALSE, fig.height=5, fig.width=10}
 ggplot(data = diamonds, aes(x = cut, fill=color)) +
@@ -217,6 +241,14 @@ ggplot(data = diamonds, aes(x = cut, fill=color)) +
   coord_flip() +
   scale_fill_brewer(palette = "Blues")
 ```
+
+.midi[
+- Which data are used as an input?
+- Are the variables statistically transformed before plotting?
+- What geometric objects are used to represent the data?
+- What variables are mapped onto which aesthetic attributes?
+- What type of scales are used to map data to aesthetics?
+]
 
 ---
 
@@ -227,17 +259,9 @@ ggplot(data = diamonds, aes(x = cut, fill=color)) +
   scale_fill_brewer(palette = "Blues")
 ```
 
-.midi[
-- Which data is used as an input?
-- Are the variables statistically transformed before plotting?
-- What geometric objects are used to represent the data?
-- What variables are mapped onto which aesthetic attributes?
-- What type of scales are used to map data to aesthetics?
-]
-
 ---
 
-## Example 5
+## Example 6
 
 ```{r echo=FALSE, fig.height=5, fig.width=10}
 ggplot(data = ggplot2::diamonds, aes(x = price/carat, fill=color)) +
@@ -248,7 +272,7 @@ ggplot(data = ggplot2::diamonds, aes(x = price/carat, fill=color)) +
 ```
 
 .midi[
-- Which data is used as an input?
+- Which data are used as an input?
 - Are the variables statistically transformed before plotting?
 - What geometric objects are used to represent the data?
 - What variables are mapped onto which aesthetic attributes?
@@ -269,9 +293,11 @@ ggplot(data = ggplot2::diamonds, aes(x = price/carat, fill=color)) +
 
 ## More `ggplot2` resources
 
-- Visit https://ggplot2.tidyverse.org/index.html for ggplot2 documentation and helpful articles. Reference section contains lots of examples for each geometry type.
+- Visit https://ggplot2.tidyverse.org/ for ggplot2 documentation and helpful articles. Reference section contains lots of examples for each geometry type.
 
-- Refer to the `ggplot2` cheatsheet: https://github.com/rstudio/cheatsheets/blob/master/data-visualization-2.1.pdf
+- Refer to the [`ggplot2` cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/data-visualization-2.1.pdf)
+
+- Book - [ggplot2: Elegant Graphics for Data Analysis](https://ggplot2-book.org/)
 
 ---
 
@@ -309,7 +335,7 @@ diamonds %>%
     scale_y_sqrt()
 ```
 
-Not the presence, or lack thereof, of any outliers.
+Note the presence, or lack thereof, of any outliers.
 
 ---
 
@@ -401,31 +427,31 @@ datasets::anscombe %>% as_tibble()
 
 ## Tidy anscombe
 
+.midi[
 ```{r}
-tidy_anscombe = datasets::anscombe %>%
+(tidy_anscombe = datasets::anscombe %>%
   pivot_longer(everything(), names_sep = 1, names_to = c("var", "group")) %>%
-  group_by(group, var) %>%
-  mutate(index = seq_len(n())) %>%
-  ungroup() %>%
-  arrange(group, index) %>%
-  pivot_wider(id_cols = c("group", "index"), names_from = var, values_from = value)
-  
-tidy_anscombe
+  pivot_wider(id_cols = group, names_from = var, 
+              values_from = value, values_fn = list(value = list)) %>% 
+  unnest(cols = c(x,y)))
 ```
+]
 
----
+--
 
+.midi[
 ```{r}
 tidy_anscombe %>%
   group_by(group) %>%
   summarize(mean_x = mean(x), mean_y = mean(y), sd_x = sd(x), sd_y = sd(y), cor = cor(x,y))
 ```
+]
 
 ---
 
 ```{r fig.width=7}
 ggplot(tidy_anscombe, aes(x = x, y = y, color = as.factor(group))) +
-  geom_point() +
+  geom_point(size=2) +
   facet_wrap(vars(group)) +
   geom_smooth(method="lm", se=FALSE, fullrange=TRUE) +
   guides(color=FALSE)
@@ -772,7 +798,7 @@ knitr::include_graphics("imgs/vis_gap.jpg")
 ```
 
 .footnote[
-http://thewhyaxis.info/gap_remake/
+http://thewhyaxis.info/gap-remake/
 ]
 
 ---
