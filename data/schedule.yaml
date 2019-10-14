@@ -57,6 +57,7 @@ schedule:
 - week: 5
   day: 0
   lecture: "Visualization & ggplot2"
+  slides: Lec05
   readings:
   - text:  R4DS - Visualization
     link: http://r4ds.had.co.nz/data-visualisation.html
