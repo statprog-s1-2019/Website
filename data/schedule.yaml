@@ -99,6 +99,7 @@ schedule:
 - week: 11
   day: 0
   lecture: "Shiny"
+  slides: Lec11
   readings:
   notes: 
 
